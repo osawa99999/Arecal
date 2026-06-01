@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AreCal v0.0348</title>
+<title>AreCal v0.0351</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -455,7 +455,7 @@ select#sc-select{
     </g>
   </g>
 </svg>
-      <div class="app-ver"><b>AreCal</b>v0.0348</div>
+      <div class="app-ver"><b>AreCal</b>v0.0351</div>
       <div style="font-size:.62em;color:#446;text-align:center;margin-top:1px;"><img src="https://hits.sh/osaki-kensetsu.github.io/arecal.svg?style=flat-square&color=0088cc&labelColor=1a1a2e" alt="visits" style="height:13px;opacity:.6;" onerror="this.style.display='none'"></div>
     </div>
     <!-- リスト -->
@@ -464,7 +464,7 @@ select#sc-select{
     </div>
     <!-- 合計 -->
     <div id="tot-wrap">
-      <div id="tot-sum">合計（単純和）: 0.0000 m²</div>
+      <div id="tot-sum">合計（単純和）: 0.00 m²</div>
       <div id="tot-union"></div>
       <button id="union-btn">🔗 ALL UNION（合成）</button>
       <div style="display:flex;gap:4px;margin-top:5px;">
@@ -731,6 +731,9 @@ select#sc-select{
 <script>
 // ================================================================
 //  AreCal v0.0211
+//  v0.0351  Fix1:面積表示を小数第2位に統一 Fix2:回転警告文を「小さい長方形〜」に変更
+//  v0.0350  追加1:回転長方形の面積誤差警告をステータスバーに表示
+//  v0.0349  Fix1:測点モードOFF中も右クリックで測点削除可能に
 //  v0.0348  Fix1:入出力展開中のsurvey-btnロック漏れ修正
 //  v0.0347  Fix1:rect/poly-btn.onの!importantを外しinline色が反映されるよう修正
 //  v0.0346  Fix1:選択合成サイドバー選択対応 Fix2:rect/poly色をツール開始時も適用
@@ -1453,7 +1456,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         hlSet.clear();
         updSidebar();redraw();
         const tot=unionNewShapes.reduce((s,sh)=>s+sh.area,0);
-          toast(`✅ ハイライトUNION完了 → ${unionNewShapes.length}図形 / ${tot.toFixed(4)} m²`,3000);
+          toast(`✅ ハイライトUNION完了 → ${unionNewShapes.length}図形 / ${tot.toFixed(2)} m²`,3000);
         } // end _doUnionExec
         if(_hasSI)customConfirm('自己交差しているオブジェクトが含まれています。\n正しく計算されない可能性がありますが、\nこのまま処理を実行しますか？',()=>_doUnionExec(),null);
         else _doUnionExec();
@@ -1489,7 +1492,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     setSelUnionMode(false);setStatus('');updSidebar();redraw();
     const tot=unionNewShapes.reduce((s,sh)=>s+sh.area,0);
     const warnSiU=unionNewShapes.some(s=>s.selfIntersect)?' ⚠自己交差あり':'';
-    toast(`✅ SELECT UNION完了 → ${unionNewShapes.length}図形 / ${tot.toFixed(4)} m²${warnSiU}`,3000);
+    toast(`✅ SELECT UNION完了 → ${unionNewShapes.length}図形 / ${tot.toFixed(2)} m²${warnSiU}`,3000);
   });
 
   // v0.0339 Fix5: 色別表示丸ボタン
@@ -1523,7 +1526,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     shapes=[...hidden,...disabled,...newShapes];
     document.getElementById('tot-union').style.display='none';
     updSidebar();redraw();
-    const tot=newShapes.reduce((s,sh)=>s+sh.area,0).toFixed(4);
+    const tot=newShapes.reduce((s,sh)=>s+sh.area,0).toFixed(2);
     navigator.clipboard.writeText(tot).then(()=>{
       showUnionDialog(tot,true);
     }).catch(()=>{
@@ -1571,8 +1574,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(e.key==='Enter'&&drawing&&tool==='poly'&&cur&&cur.pts.length>=2)finishShape();
     // 6: 長方形角度 上下矢印 0.5度ずつ
     if(drawing&&tool==='rect'){
-      if(e.key==='ArrowUp'){e.preventDefault();rectAngle=(rectAngle+0.5)%360;redraw(lastMouseX,lastMouseY);return;}
-      if(e.key==='ArrowDown'){e.preventDefault();rectAngle=(rectAngle-0.5+360)%360;redraw(lastMouseX,lastMouseY);return;}
+      if(e.key==='ArrowUp'){e.preventDefault();rectAngle=(rectAngle+0.5)%360;
+        const _ra1=rectAngle%180;const _warn1=(_ra1>1&&_ra1<89)?'　⚠ 小さい長方形を回転させると計算が難しいんで面積に数％の誤差が出ます':'';
+        setStatus(`⬛ 四角形：2点クリック　角度:${rectAngle.toFixed(1)}°${_warn1}`);redraw(lastMouseX,lastMouseY);return;}
+      if(e.key==='ArrowDown'){e.preventDefault();rectAngle=(rectAngle-0.5+360)%360;
+        const _ra2=rectAngle%180;const _warn2=(_ra2>1&&_ra2<89)?'　⚠ 小さい長方形を回転させると計算が難しいんで面積に数％の誤差が出ます':'';
+        setStatus(`⬛ 四角形：2点クリック　角度:${rectAngle.toFixed(1)}°${_warn2}`);redraw(lastMouseX,lastMouseY);return;}
     }
     // v0.0333: Fix8 Delキーで選択中オブジェクト削除
     if(e.key==='Delete'||e.key==='Backspace'){
@@ -1630,6 +1637,12 @@ document.addEventListener('DOMContentLoaded',()=>{
       const _hSv2=surveyPts.findIndex(p=>Math.hypot(p.x-_lx2,p.y-_ly2)<12/zoom);
       if(_hSv2>=0){pushUndo();surveyPts.splice(_hSv2,1);redraw();return;}
       setSurveyMode(false);toast('↩ 測点設置をキャンセル',800);return;
+    }
+    // v0.0349 Fix1: 測点モードOFF中も測点を右クリックで削除
+    if(!surveyMode&&!drawing){
+      const _r3=cvWrap.getBoundingClientRect(),_lx3=(e.clientX-_r3.left-ox)/zoom,_ly3=(e.clientY-_r3.top-oy)/zoom;
+      const _hSv3=surveyPts.findIndex(p=>Math.hypot(p.x-_lx3,p.y-_ly3)<14/zoom);
+      if(_hSv3>=0){pushUndo();surveyPts.splice(_hSv3,1);redraw();toast('🗑 測点を削除',800);return;}
     }
     // 12: 多角形モード中は右クリック=1点前削除
     if(drawing&&tool==='poly'&&cur&&cur.pts.length>0){
@@ -2444,7 +2457,7 @@ function finishShape(){
         if(validSegs.length>1){
           toast(`✂ 自己交差を検出 → ${validSegs.length}図形に自動分割しました`);
         }else{
-          toast(`✅ 自己交差を自動補正しました — ${validSegs[0].area.toFixed(4)} m²`);
+          toast(`✅ 自己交差を自動補正しました — ${validSegs[0].area.toFixed(2)} m²`);
         }
         if(rectLoop&&prevTool==='rect'){cur={pts:[]};redraw();return;}
         showSnap(null);drawing=false;tool=null;lastSnap=null;setStatus('');
@@ -2462,7 +2475,7 @@ function finishShape(){
   const prevTool=tool;cur=null;
   updSidebar();
   const si=sh.selfIntersect?' ⚠自己交差':'';
-  toast(`✅ 図形${shapes.length} — ${sh.area.toFixed(4)} m²${si}`);
+  toast(`✅ 図形${shapes.length} — ${sh.area.toFixed(2)} m²${si}`);
   if(rectLoop&&prevTool==='rect'){cur={pts:[]};redraw();return;}
   showSnap(null); // 12: スナップドットを確実に消す
   drawing=false;tool=null;
@@ -2848,7 +2861,7 @@ function calcSum(){
   const v=shapes.filter(sh=>sh.enabled!==false&&colorFilter[sh.color||'blue']!==false)
     .reduce((s,sh)=>s+sh.area,0);
   const el=document.getElementById('tot-sum');
-  if(el)el.textContent='合計（単純和）: '+v.toFixed(4)+' m²';
+  if(el)el.textContent='合計（単純和）: '+v.toFixed(2)+' m²';
   return v;
 }
 
@@ -3259,7 +3272,7 @@ function updSidebar(){
     // B-15: 面積（右寄せ）
     const ar=document.createElement('span');
     ar.className='sh-area';
-    ar.textContent=sh.area.toFixed(4)+' m²';
+    ar.textContent=sh.area.toFixed(2)+' m²';
 
     // 削除ボタン
     const db=document.createElement('button');
@@ -3465,7 +3478,7 @@ function _doExportDXF(_withLbl){
       const dispName=(sh.name&&!sh.name.startsWith('！'))?sh.name:getShapeName(sh,idx);
       L(0,'TEXT');L(8,'LABEL');L(10,(cx*mpp).toFixed(6));L(20,(-cy*mpp+0.4).toFixed(6));L(30,'0.0');L(40,'0.12');L(1,String(idx+1)+'.');
       L(0,'TEXT');L(8,'LABEL');L(10,(cx*mpp).toFixed(6));L(20,(-cy*mpp+0.15).toFixed(6));L(30,'0.0');L(40,'0.12');L(1,dispName);
-      L(0,'TEXT');L(8,'LABEL');L(10,(cx*mpp).toFixed(6));L(20,(-cy*mpp-0.15).toFixed(6));L(30,'0.0');L(40,'0.10');L(1,sh.area.toFixed(4)+' m2');
+      L(0,'TEXT');L(8,'LABEL');L(10,(cx*mpp).toFixed(6));L(20,(-cy*mpp-0.15).toFixed(6));L(30,'0.0');L(40,'0.10');L(1,sh.area.toFixed(2)+' m2');
     });
   }
   L(0,'ENDSEC');
@@ -3563,10 +3576,10 @@ function exportXLSX(){
   const rows=[['図形番号','名称','タイプ','面積(m²)','色','有効']];
   shapes.forEach((sh,i)=>{
     rows.push([i+1,getShapeName(sh,i),sh.type==='rect'?'四角形':sh.type==='edit'?'編集形状':`${getOuter(sh).length}角形`,
-      parseFloat(sh.area.toFixed(4)),cLbl[sh.color||'blue']||sh.color,sh.enabled===false?'×':getHoles(sh).length>0?'穴あき':'○']);
+      parseFloat(sh.area.toFixed(2)),cLbl[sh.color||'blue']||sh.color,sh.enabled===false?'×':getHoles(sh).length>0?'穴あき':'○']);
   });
   rows.push([]);
-  rows.push(['Simple Sum (all enabled)','','',parseFloat(calcSum().toFixed(4)),'','']);
+  rows.push(['Simple Sum (all enabled)','','',parseFloat(calcSum().toFixed(2)),'','']);
   // Union面積を計算
   let unionArea='N/A';
   if(shapes.filter(s=>s.enabled!==false).length>=2){
@@ -3574,7 +3587,7 @@ function exportXLSX(){
       const saved=shapes.slice();
       const um=execUnion();
       shapes=saved;
-      if(um&&um.length)unionArea=um.reduce((s,pts)=>s+calcArea(pts),0).toFixed(4);
+      if(um&&um.length)unionArea=um.reduce((s,pts)=>s+calcArea(pts),0).toFixed(2);
     }catch(e){}
   }
   rows.push(['All Union Area','','',unionArea,'','']);
@@ -3769,7 +3782,7 @@ function _doExportPDF(_pdfWithLbl,mnX,mnY,mxX,mxY){
           cctx.strokeStyle='#fff';cctx.lineWidth=4;
           const dispName2=(sh.name&&!sh.name.startsWith('！'))?sh.name:getShapeName(sh,idx2);
           const numStr=String(idx2+1)+'.';
-          const ar2=sh.area.toFixed(4)+' m²';
+          const ar2=sh.area.toFixed(2)+' m²';
           cctx.strokeText(numStr,cx,cy-fs2*1.3);cctx.strokeText(dispName2,cx,cy-fs2*.2);cctx.strokeText(ar2,cx,cy+fs2*.9);
           cctx.fillStyle='#111';
           cctx.fillText(numStr,cx,cy-fs2*1.3);cctx.fillText(dispName2,cx,cy-fs2*.2);cctx.fillText(ar2,cx,cy+fs2*.9);
@@ -3809,7 +3822,7 @@ function _doExportPDF(_pdfWithLbl,mnX,mnY,mxX,mxY){
       // テーブル行
       let y=36;
       const validShapes=shapes.filter(sh=>sh.enabled!==false);
-      const sumArea=parseFloat(calcSum().toFixed(4));
+      const sumArea=parseFloat(calcSum().toFixed(2));
 
       shapes.forEach((sh,idx)=>{
         const even=idx%2===0;
@@ -3828,7 +3841,7 @@ function _doExportPDF(_pdfWithLbl,mnX,mnY,mxX,mxY){
         doc.text(String(idx+1),colX[0]+1,y+4.3);
         doc.text(nm.slice(0,14),colX[1]+1,y+4.3);
         doc.text(tp,colX[2]+1,y+4.3);
-        doc.text(sh.area.toFixed(4),colX[3]+1,y+4.3);
+        doc.text(sh.area.toFixed(2),colX[3]+1,y+4.3);
         doc.text(colEn[sh.color||'blue']||sh.color,colX[4]+1,y+4.3);
         doc.text(sh.enabled!==false?'Y':'N',colX[5]+1,y+4.3);
         y+=6;
@@ -3842,7 +3855,7 @@ function _doExportPDF(_pdfWithLbl,mnX,mnY,mxX,mxY){
       doc.setFontSize(10);doc.setTextColor(30,30,30);
       doc.setFont(undefined,'bold');
       doc.text(`Simple Sum (all):`,14,y);
-      doc.text(`${parseFloat(calcSum().toFixed(4))} m²`,100,y);
+      doc.text(`${parseFloat(calcSum().toFixed(2))} m²`,100,y);
       y+=6;
 
       // ALL UNION面積
@@ -3852,7 +3865,7 @@ function _doExportPDF(_pdfWithLbl,mnX,mnY,mxX,mxY){
           if(merged&&merged.length){
             const unionArea=merged.reduce((s,pts)=>s+calcArea(pts),0);
             doc.text(`All Union Area:`,14,y);
-            doc.text(`${unionArea.toFixed(4)} m²`,100,y);
+            doc.text(`${unionArea.toFixed(2)} m²`,100,y);
           }
         }catch(e){}
       }
