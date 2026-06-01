@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AreCal v0.0346</title>
+<title>AreCal v0.0347</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -417,8 +417,11 @@ select#sc-select{
 
 /* v0.0324: 測点 */
 /* v0.0332: 全ツールボタン .on 統一 */
-#rect-btn.on,#poly-btn.on,#sel-union-btn.on,#sub-btn.on,#dist-btn.on,#survey-btn.on{
+#sel-union-btn.on,#sub-btn.on,#dist-btn.on,#survey-btn.on{
   background:var(--blue) !important;border-color:#64b5f6 !important;color:#fff !important;}
+/* v0.0347: rect/polyは!importantなし → inline styleで現在色を反映 */
+#rect-btn.on,#poly-btn.on{
+  border-color:#64b5f6;color:#fff;}
 /* v0.0328: PDF出力範囲モード */
 #pdf-range-overlay{position:fixed;inset:0;z-index:8000;cursor:crosshair;background:rgba(0,0,0,.35);display:none;}
 #pdf-range-overlay.active{display:block;}
@@ -452,7 +455,7 @@ select#sc-select{
     </g>
   </g>
 </svg>
-      <div class="app-ver"><b>AreCal</b>v0.0346</div>
+      <div class="app-ver"><b>AreCal</b>v0.0347</div>
       <div style="font-size:.62em;color:#446;text-align:center;margin-top:1px;"><img src="https://hits.sh/osaki-kensetsu.github.io/arecal.svg?style=flat-square&color=0088cc&labelColor=1a1a2e" alt="visits" style="height:13px;opacity:.6;" onerror="this.style.display='none'"></div>
     </div>
     <!-- リスト -->
@@ -728,6 +731,7 @@ select#sc-select{
 <script>
 // ================================================================
 //  AreCal v0.0211
+//  v0.0347  Fix1:rect/poly-btn.onの!importantを外しinline色が反映されるよう修正
 //  v0.0346  Fix1:選択合成サイドバー選択対応 Fix2:rect/poly色をツール開始時も適用
 //           Fix3:sel-union/sub-btnのCSSをrect/poly系統に統一
 //  v0.0345  追加1:多角形確定時の自己交差自動分割(SimplifyPolygon+classifyPaths)
