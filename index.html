@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AreCal v0.0347</title>
+<title>AreCal v0.0348</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -455,7 +455,7 @@ select#sc-select{
     </g>
   </g>
 </svg>
-      <div class="app-ver"><b>AreCal</b>v0.0347</div>
+      <div class="app-ver"><b>AreCal</b>v0.0348</div>
       <div style="font-size:.62em;color:#446;text-align:center;margin-top:1px;"><img src="https://hits.sh/osaki-kensetsu.github.io/arecal.svg?style=flat-square&color=0088cc&labelColor=1a1a2e" alt="visits" style="height:13px;opacity:.6;" onerror="this.style.display='none'"></div>
     </div>
     <!-- リスト -->
@@ -731,6 +731,7 @@ select#sc-select{
 <script>
 // ================================================================
 //  AreCal v0.0211
+//  v0.0348  Fix1:入出力展開中のsurvey-btnロック漏れ修正
 //  v0.0347  Fix1:rect/poly-btn.onの!importantを外しinline色が反映されるよう修正
 //  v0.0346  Fix1:選択合成サイドバー選択対応 Fix2:rect/poly色をツール開始時も適用
 //           Fix3:sel-union/sub-btnのCSSをrect/poly系統に統一
@@ -1315,7 +1316,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   let ioMenuOpen=false,ioSubOpen='';
   // Fix1/7: closeIoMenu — ボタンを確実に再有効化
   const _IO_LOCK_BTNS=['rect-btn','poly-btn','sel-union-btn','sub-btn','dist-btn',
-    'undo-btn','redo-btn','sort-color-btn','union-btn','clear-btn'];
+    'survey-btn','undo-btn','redo-btn','sort-color-btn','union-btn','clear-btn']; // v0.0348 Fix1
   function closeIoMenu(){
     ioMenuOpen=false;ioSubOpen='';
     document.getElementById('io-menu').style.display='none';
