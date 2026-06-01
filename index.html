@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AreCal v0.0351</title>
+<title>AreCal v0.0352</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -455,7 +455,7 @@ select#sc-select{
     </g>
   </g>
 </svg>
-      <div class="app-ver"><b>AreCal</b>v0.0351</div>
+      <div class="app-ver"><b>AreCal</b>v0.0352</div>
       <div style="font-size:.62em;color:#446;text-align:center;margin-top:1px;"><img src="https://hits.sh/osaki-kensetsu.github.io/arecal.svg?style=flat-square&color=0088cc&labelColor=1a1a2e" alt="visits" style="height:13px;opacity:.6;" onerror="this.style.display='none'"></div>
     </div>
     <!-- リスト -->
@@ -731,6 +731,7 @@ select#sc-select{
 <script>
 // ================================================================
 //  AreCal v0.0211
+//  v0.0352  Fix1:スナップラベルのCanvas描画を削除（HTMLラベルと重複解消）
 //  v0.0351  Fix1:面積表示を小数第2位に統一 Fix2:回転警告文を「小さい長方形〜」に変更
 //  v0.0350  追加1:回転長方形の面積誤差警告をステータスバーに表示
 //  v0.0349  Fix1:測点モードOFF中も右クリックで測点削除可能に
@@ -2956,14 +2957,7 @@ function redraw(mx,my,mode){
     // 共通: 中心点
     drawCtx.beginPath();drawCtx.arc(sx,sy,3/zoom,0,Math.PI*2);
     drawCtx.fillStyle=c;drawCtx.fill();
-    // Fix3: スナップ種別名表示
-    const snapNames={endpoint:'端点',midpoint:'中点',online:'線上',intersect:'交点'};
-    const fs=Math.max(10,11/zoom);
-    drawCtx.font=`bold ${fs}px sans-serif`;
-    drawCtx.fillStyle='#000000';drawCtx.strokeStyle='#ffffff';drawCtx.lineWidth=3/zoom;
-    const tx=sx+10/zoom,ty=sy-10/zoom;
-    const sLabel=snapNames[type]||type;
-    drawCtx.strokeText(sLabel,tx,ty);drawCtx.fillText(sLabel,tx,ty);
+    // v0.0352 Fix1: Canvas側のスナップラベルを削除（HTMLの#sd-xxxラベルと重複するため）
     drawCtx.restore();
   }
   // Fix1: scCal 1点目ドット＋ゴムライン
