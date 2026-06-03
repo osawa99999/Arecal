@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AreCal v0.0371</title>
+<title>AreCal v0.0384</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -326,6 +326,8 @@ select#sc-select{
   z-index:45;pointer-events:none;
   display:none;
 }
+/* v0.0382 Fix1: コピーボタンはpointer-eventsを有効に */
+#status-bar button{pointer-events:auto;}
 /* C-2: 距離計測バー */
 #dist-warn-bar{
   display:none !important; /* v0.0316: setStatusに統合済み */
@@ -588,7 +590,7 @@ select#sc-select{
         <button id="poly-btn">🔵 多角形</button>
         <button id="sel-union-btn">🎯 選択合成</button>
         <button id="sub-btn">✂ 部分削除</button>
-        <button id="dist-btn">📏 距離</button>
+        <button id="dist-btn">📏 距離測定</button>
         <button id="survey-btn">📍 測点設置</button>
         <button id="io-btn" style="grid-column:1/-1;">📁 入出力</button>
       </div>
@@ -731,13 +733,13 @@ select#sc-select{
 
 <!-- 回転コントロール -->
 <div id="rot-ctrl">
-  <div id="rot-ang-display">0.0°</div>
+  <button id="rot-reset">リセット</button>
   <button class="rot-step-btn" data-step="-1">−1°</button>
   <button class="rot-step-btn" data-step="-0.1">−0.1°</button>
-  <input type="number" id="rot-ang-input" step="0.1" value="0" placeholder="角度">
+  <div id="rot-ang-display">0.0°</div>
+  <input type="number" id="rot-ang-input" step="0.1" value="0" placeholder="角度" style="display:none;">
   <button class="rot-step-btn" data-step="0.1">+0.1°</button>
   <button class="rot-step-btn" data-step="1">+1°</button>
-  <button id="rot-reset">リセット</button>
   <button id="rot-ok">✓ OK</button>
 </div>
 
@@ -747,6 +749,33 @@ select#sc-select{
 // ================================================================
 //  AreCal v0.0371
 //  --- 今セッション変更履歴 ---
+//  v0.0384  Fix1:距離右クリック1点戻りをcontextmenuハンドラに正しく実装
+//           Fix2:距離ボタンラベルを「距離測定」に変更
+//           Fix3:穴の点線色をオブジェクトカラーに合わせる
+//  v0.0383  Fix1:距離右クリックで1点戻る(戻れなければモードキャンセル)
+//           Fix2:距離線を太く(確定3px/ゴム3px)
+//           Fix3:ステータスバーに操作ガイド追加、注意文を下段・文言変更
+//  v0.0382  Fix1:距離コピーボタンのクリックがcanvasに伝播する問題を修正
+//  v0.0381  追加1:距離軌跡を累積表示(distHistory配列でモードOFFまで保持)
+//           Fix1:距離線/穴点線/ポリプレビュー線幅をzoom非依存の固定pxに統一
+//  v0.0380  追加1:距離モードに累計距離表示+区間/累計コピーボタンをステータスバーに追加
+//  v0.0379  Fix1:validSegs[0].area undefined修正(seg.areaはないのでcalcAreaShapeで取得)
+//           Fix2:正常完了パスのリセット処理順番整理(setStatus先頭へ)
+//  v0.0378  Fix1:自己交差0面積時のリセット処理をinline展開(cancelDraw依存を排除)
+//  v0.0377  Fix1:toast()をcancelDraw()の後に移動(cancelDrawがtoastを消していた)
+//  v0.0376  Fix1:pushUndo()を面積チェック後に移動(0面積でundoスタック汚染防止)
+//           Fix2:自己交差分割失敗パスにも0面積チェック追加(表示残り修正)
+//  v0.0375  Fix1:四角形0面積時トースト表示+rectLoop継続(cancelDrawしない)+redraw
+//           Fix2:多角形0面積時トースト表示+cancelDraw後redraw追加
+//  v0.0374  Fix1:四角形面積チェックをm²換算0.005未満で弾く(px²換算では不足)
+//           Fix2:多角形自己交差分割で全片が極小の場合cancelDrawして終了
+//           Fix3:validSegs=0時にshapes.pushされていたバグ修正
+//  v0.0373  Fix1:四角形面積0チェックをw*h積ベースに強化(すり抜け防止)
+//           Fix2:finishShape正常完了時にcurrentToolColor'blue'リセット追加
+//  v0.0372  Fix1:部分削除後に面積0.00オブジェクトを自動削除+トースト
+//           Fix2:多角形自己交差分割後の極小片(0.005m²未満)を自動削除
+//           Fix3:四角形確定前に面積0チェック強化(w/h極小を弾く)
+//           Fix4:回転UIレイアウト変更(リセット左端/角度表示中央/input非表示)
 //  v0.0371  Fix1:execUnionをGemini方式に刷新(outer+hole一発Union→PolyTree)
 //           Fix2:calcUnion/xlsx/pdf のexecUnion戻り値{outer,holes}対応
 //  v0.0370  Fix1:穴のCW/CCW巻き方向修正(ClipperへCCWで渡す)
@@ -980,7 +1009,34 @@ function setSubMode(on){
   if(on){
     if(drawing)cancelDraw(); // B-1: 他ツール解除
     if(selUnionMode)setSelUnionMode(false);
-    if(distMode)setDistMode(false); // Fix5: 排他制御
+    // v0.0383 Fix1: 距離モード中は右クリックで1点戻る
+    if(distMode){
+      if(distHistory.length>1){
+        distHistory.pop();
+        if(distSegments.length>0){distTotal-=distSegments.pop();if(distTotal<0)distTotal=0;}
+        distPts=distHistory.length>=1?[distHistory[distHistory.length-1]]:[];
+        // ステータス更新
+        if(distSegments.length>0){
+          const dv=distSegments[distSegments.length-1];
+          const mpp2=scaleDenom?(25.4/72)*scaleDenom/1000/RS:0;
+          const dvStr2=mpp2?`${dv.toFixed(3)} m`:`-- px`;
+          const totStr2=mpp2?`${distTotal.toFixed(3)} m`:'--';
+          const btnStyle2="font-size:.8em;padding:1px 7px;border-radius:4px;border:1px solid #0af;background:rgba(0,170,255,.15);color:#0af;cursor:pointer;pointer-events:auto;";
+          setStatus(
+            `📏 区間: <b>${dvStr2}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="event.stopPropagation();navigator.clipboard.writeText('${dvStr2}')" style="${btnStyle2}">コピー</button>`+
+            `　　累計: <b>${totStr2}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="event.stopPropagation();navigator.clipboard.writeText('${totStr2}')" style="${btnStyle2}">コピー</button>`+
+            `　　<span style="opacity:.7;font-size:.9em;">右クリック：1回戻る　/　ESC：測定モード終了</span>`+
+            `
+⚠ 注意：PDF図面の上の数値、サイズはCADと違い正確ではありません`
+          );
+        } else {
+          setStatus('📏 距離計測：次の点をクリック（SHIFTで直交モード）\n右クリック：1回戻る　/　ESC：測定モード終了');
+        }
+        redraw();return;
+      } else {
+        setDistMode(false);toast('↩ 距離計測をキャンセル',800);return;
+      }
+    } // Fix5: 排他制御
     if(surveyMode)setSurveyMode(false); // v0.0327
     btn.classList.add('active');doBtn.style.display='flex';doBtn.disabled=true;
     setStatus('✂ 部分削除モード：ベースとなるオブジェクトを選択してください');
@@ -1018,7 +1074,34 @@ function setSelUnionMode(on){
   if(on){
     if(drawing)cancelDraw(); // B-1: 他ツール解除
     if(subMode)setSubMode(false);
-    if(distMode)setDistMode(false); // Fix5
+    // v0.0384 Fix1: 距離モード中は右クリックで1点戻る
+    if(distMode){
+      if(distHistory.length>1){
+        distHistory.pop();
+        if(distSegments.length>0){distTotal-=distSegments.pop();if(distTotal<0)distTotal=0;}
+        distPts=distHistory.length>=1?[distHistory[distHistory.length-1]]:[];
+        if(distSegments.length>0){
+          const _dv=distSegments[distSegments.length-1];
+          const _mpp=scaleDenom?(25.4/72)*scaleDenom/1000/RS:0;
+          const _dvStr=_mpp?`${_dv.toFixed(3)} m`:`-- px`;
+          const _totStr=_mpp?`${distTotal.toFixed(3)} m`:'--';
+          const _bs="font-size:.8em;padding:1px 7px;border-radius:4px;border:1px solid #0af;background:rgba(0,170,255,.15);color:#0af;cursor:pointer;pointer-events:auto;transition:background .1s,transform .1s;";
+          const _cpFn=(val)=>`event.stopPropagation();navigator.clipboard.writeText('${val}');this.style.background='rgba(0,170,255,.55)';this.style.transform='scale(.93)';this.textContent='✓';setTimeout(()=>{this.style.background='rgba(0,170,255,.15)';this.style.transform='';this.textContent='コピー';},600);`;
+          setStatus(
+            `📏 区間: <b>${_dvStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_dvStr)}" style="${_bs}">コピー</button>`+
+            `　　累計: <b>${_totStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_totStr)}" style="${_bs}">コピー</button>`+
+            `　　<span style="opacity:.7;font-size:.9em;">右クリック：1回戻る　/　ESC：測定モード終了</span>`+
+            `
+⚠ 注意：PDF図面の上の数値、サイズはCADと違い正確ではありません`
+          );
+        } else {
+          setStatus('📏 距離計測：次の点をクリック（SHIFTで直交モード）\n右クリック：1回戻る　/　ESC：測定モード終了');
+        }
+        redraw();return;
+      } else {
+        setDistMode(false);toast('↩ 距離計測をキャンセル',800);return;
+      }
+    } // Fix5
     if(surveyMode)setSurveyMode(false); // v0.0327
     btn.classList.add('active');
     setStatus('🎯 選択合成モード：合成したいオブジェクトを選択してください（2つ以上）');
@@ -1088,6 +1171,9 @@ let distMode=false;
 let hoverShapeIdx=-1; // ホバーツールチップ対象インデックス
 let _hoverAnimId=null; // ホバーパルスアニメID
 let distPts=[];
+let distTotal=0; // v0.0380: 累計距離(m)
+let distHistory=[]; // v0.0381: 累積軌跡点列 [{x,y},...] ※モードOFFまで保持
+let distSegments=[]; // v0.0383: 区間距離履歴(m) ※1回戻る用
 // A2: 手動縮尺キャリブ
 let scCalMode=false;
 let scCalPts=[];
@@ -1420,7 +1506,34 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(drawing)cancelDraw();
       if(selUnionMode)setSelUnionMode(false);
       if(subMode)setSubMode(false);
-      if(distMode)setDistMode(false);
+      // v0.0384 Fix1: 距離モード中は右クリックで1点戻る
+    if(distMode){
+      if(distHistory.length>1){
+        distHistory.pop();
+        if(distSegments.length>0){distTotal-=distSegments.pop();if(distTotal<0)distTotal=0;}
+        distPts=distHistory.length>=1?[distHistory[distHistory.length-1]]:[];
+        if(distSegments.length>0){
+          const _dv=distSegments[distSegments.length-1];
+          const _mpp=scaleDenom?(25.4/72)*scaleDenom/1000/RS:0;
+          const _dvStr=_mpp?`${_dv.toFixed(3)} m`:`-- px`;
+          const _totStr=_mpp?`${distTotal.toFixed(3)} m`:'--';
+          const _bs="font-size:.8em;padding:1px 7px;border-radius:4px;border:1px solid #0af;background:rgba(0,170,255,.15);color:#0af;cursor:pointer;pointer-events:auto;transition:background .1s,transform .1s;";
+          const _cpFn=(val)=>`event.stopPropagation();navigator.clipboard.writeText('${val}');this.style.background='rgba(0,170,255,.55)';this.style.transform='scale(.93)';this.textContent='✓';setTimeout(()=>{this.style.background='rgba(0,170,255,.15)';this.style.transform='';this.textContent='コピー';},600);`;
+          setStatus(
+            `📏 区間: <b>${_dvStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_dvStr)}" style="${_bs}">コピー</button>`+
+            `　　累計: <b>${_totStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_totStr)}" style="${_bs}">コピー</button>`+
+            `　　<span style="opacity:.7;font-size:.9em;">右クリック：1回戻る　/　ESC：測定モード終了</span>`+
+            `
+⚠ 注意：PDF図面の上の数値、サイズはCADと違い正確ではありません`
+          );
+        } else {
+          setStatus('📏 距離計測：次の点をクリック（SHIFTで直交モード）\n右クリック：1回戻る　/　ESC：測定モード終了');
+        }
+        redraw();return;
+      } else {
+        setDistMode(false);toast('↩ 距離計測をキャンセル',800);return;
+      }
+    }
       if(scCalMode)setScCalMode(false);if(surveyMode)setSurveyMode(false);
       // Fix7: 全ボタングレーアウト・無効化
       _IO_LOCK_BTNS.forEach(id=>{
@@ -1497,10 +1610,14 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(hasSelfIntersect(m.outer)){ns.selfIntersect=true;ns.name='！編集形状';}
       return ns;
     });
-    shapes=[...kept,...subNewShapes];
+    // v0.0372 Fix1: 面積0.00(0.005m²未満)の極小オブジェクトを自動削除
+    const subFiltered=subNewShapes.filter(s=>calcAreaShape(s)>=0.005);
+    const subRemoved=subNewShapes.length-subFiltered.length;
+    shapes=[...kept,...subFiltered];
     setSubMode(false);setStatus('');updSidebar();redraw();
-    const warnSi=subNewShapes.some(s=>s.selfIntersect)?' ⚠自己交差あり':'';
-    toast(`✂ 部分削除完了 → ${subResult.length}図形${warnSi}`,2500);
+    const warnSi=subFiltered.some(s=>s.selfIntersect)?' ⚠自己交差あり':'';
+    const rmMsg=subRemoved>0?`\n⚠ 部分削除により面積0のオブジェクトが${subRemoved}個発生したため、自動削除しました`:'';
+    toast(`✂ 部分削除完了 → ${subFiltered.length}図形${warnSi}${rmMsg}`,3000);
   });
 
   document.getElementById('sel-union-btn').addEventListener('click',()=>{
@@ -1735,7 +1852,34 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(drawing){rectLoop=false;drawing=false;cur=null;tool=null;lastSnap=null;setStatus('');}
     if(selUnionMode)setSelUnionMode(false);
     if(subMode)setSubMode(false);
-    if(distMode)setDistMode(false);
+    // v0.0384 Fix1: 距離モード中は右クリックで1点戻る
+    if(distMode){
+      if(distHistory.length>1){
+        distHistory.pop();
+        if(distSegments.length>0){distTotal-=distSegments.pop();if(distTotal<0)distTotal=0;}
+        distPts=distHistory.length>=1?[distHistory[distHistory.length-1]]:[];
+        if(distSegments.length>0){
+          const _dv=distSegments[distSegments.length-1];
+          const _mpp=scaleDenom?(25.4/72)*scaleDenom/1000/RS:0;
+          const _dvStr=_mpp?`${_dv.toFixed(3)} m`:`-- px`;
+          const _totStr=_mpp?`${distTotal.toFixed(3)} m`:'--';
+          const _bs="font-size:.8em;padding:1px 7px;border-radius:4px;border:1px solid #0af;background:rgba(0,170,255,.15);color:#0af;cursor:pointer;pointer-events:auto;transition:background .1s,transform .1s;";
+          const _cpFn=(val)=>`event.stopPropagation();navigator.clipboard.writeText('${val}');this.style.background='rgba(0,170,255,.55)';this.style.transform='scale(.93)';this.textContent='✓';setTimeout(()=>{this.style.background='rgba(0,170,255,.15)';this.style.transform='';this.textContent='コピー';},600);`;
+          setStatus(
+            `📏 区間: <b>${_dvStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_dvStr)}" style="${_bs}">コピー</button>`+
+            `　　累計: <b>${_totStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_totStr)}" style="${_bs}">コピー</button>`+
+            `　　<span style="opacity:.7;font-size:.9em;">右クリック：1回戻る　/　ESC：測定モード終了</span>`+
+            `
+⚠ 注意：PDF図面の上の数値、サイズはCADと違い正確ではありません`
+          );
+        } else {
+          setStatus('📏 距離計測：次の点をクリック（SHIFTで直交モード）\n右クリック：1回戻る　/　ESC：測定モード終了');
+        }
+        redraw();return;
+      } else {
+        setDistMode(false);toast('↩ 距離計測をキャンセル',800);return;
+      }
+    }
     // ハイライトがあれば解除して終了
     if(hlSet.size){hlSet.clear();updSidebar();redraw();}
   });
@@ -2404,21 +2548,31 @@ function onMouseDown(e){
       distPts.push(pt);
     }
     if(distPts.length===1){
-      setStatus('📏 距離計測：次の点をクリック（SHIFTで直交モード）\n⚠ 注意：PDF図面の数値はCADと違い正確ではありません');
+      setStatus('📏 距離計測：次の点をクリック（SHIFTで直交モード）\n右クリック：1回戻る　/　ESC：測定モード終了');
     }
     if(distPts.length===2){
       const mpp=scaleDenom?(25.4/72)*scaleDenom/1000/RS:0;
       const dx=(distPts[1].x-distPts[0].x)*mpp;
       const dy=(distPts[1].y-distPts[0].y)*mpp;
       const d=Math.sqrt(dx*dx+dy*dy);
-      const dr=document.getElementById('dist-result');
       let dv=d;
-      if(mpp&&snapRound>1){
-        const dm=d*1000;
-        dv=Math.round(dm/snapRound)*snapRound/1000;
-      }
-      dr.textContent=mpp?`距離: ${dv.toFixed(3)} m`:`距離: ${Math.sqrt(Math.pow(distPts[1].x-distPts[0].x,2)+Math.pow(distPts[1].y-distPts[0].y,2)).toFixed(1)} px (スケール未設定)`;
-      dr.style.display='block';
+      if(mpp&&snapRound>1){const dm=d*1000;dv=Math.round(dm/snapRound)*snapRound/1000;}
+      // v0.0380: 累計加算
+      distTotal+=dv;
+      // v0.0381: 軌跡に追加（初回は2点とも、以降は末尾のみ）
+      if(distHistory.length===0){distHistory.push(distPts[0],distPts[1]);}else{distHistory.push(distPts[1]);}
+      distSegments.push(dv); // v0.0383: 区間距離を記録
+      const dvStr=mpp?`${dv.toFixed(3)} m`:`${Math.sqrt(Math.pow(distPts[1].x-distPts[0].x,2)+Math.pow(distPts[1].y-distPts[0].y,2)).toFixed(1)} px`;
+      const totStr=mpp?`${distTotal.toFixed(3)} m`:'--';
+      const btnStyle="font-size:.8em;padding:1px 7px;border-radius:4px;border:1px solid #0af;background:rgba(0,170,255,.15);color:#0af;cursor:pointer;pointer-events:auto;transition:background .1s,transform .1s;";
+      const _copyFn=(val)=>`event.stopPropagation();navigator.clipboard.writeText('${val}');this.style.background='rgba(0,170,255,.55)';this.style.transform='scale(.93)';this.textContent='✓';setTimeout(()=>{this.style.background='rgba(0,170,255,.15)';this.style.transform='';this.textContent='コピー';},600);`;
+      setStatus(
+        `📏 区間: <b>${dvStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_copyFn(dvStr)}" style="${btnStyle}">コピー</button>`+
+        `　　累計: <b>${totStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_copyFn(totStr)}" style="${btnStyle}">コピー</button>`+
+        `　　<span style="opacity:.7;font-size:.9em;">右クリック：1回戻る　/　ESC：測定モード終了</span>`+
+        `
+⚠ 注意：PDF図面の上の数値、サイズはCADと違い正確ではありません`
+      );
       redraw();
     } else {redraw();}
     return;
@@ -2562,12 +2716,14 @@ function finishShape(){
   }
   if(cur.pts.length<2){cancelDraw();return;}
   const shArea=calcAreaPts(cur.pts);
-  if(shArea<1e-10){
-    toast('⚠ 面積0のオブジェクトは作れません');
-    cancelDraw();return;
+  // v0.0374 Fix1: m²換算で0.005未満は作成不可（px²単位では精度不足）
+  const shAreaM2=scaleDenom?calcAreaShape({outer:cur.pts,holes:[]}):0;
+  if(shArea<1e-10||(scaleDenom&&shAreaM2<0.005)){
+    // v0.0377 Fix1: cancelDrawがtoastを消すのでcancelDraw後にtoast
+    if(tool==='rect'){cur={pts:[]};redraw();toast('⚠ 面積が小さすぎます（0.01m²以下は作成不可）');return;}
+    cancelDraw();redraw();toast('⚠ 面積が小さすぎます（0.01m²以下は作成不可）');return;
   }
   const sh={type:tool,outer:cur.pts,holes:[],area:shArea,color:currentToolColor};
-  pushUndo();
   // v0.0345: 多角形確定時、自己交差を自動分割
   if(tool==='poly'&&hasSelfIntersect(cur.pts)){
     const SF=100;
@@ -2578,34 +2734,61 @@ function finishShape(){
       if(simplified&&simplified.length>0) splitResult=classifyPaths(simplified,SF);
     }catch(e){}
     if(splitResult&&splitResult.length>=1){
-      const validSegs=splitResult.filter(seg=>calcAreaPts(seg.outer)>=1e-10);
+      const allSegs=splitResult.filter(seg=>calcAreaPts(seg.outer)>=1e-10);
+      // v0.0372 Fix2: 0.005m²未満の極小片を自動除去
+      const validSegs=allSegs.filter(seg=>calcAreaShape({outer:seg.outer,holes:seg.holes||[]})>=0.005);
+      const removedCount=allSegs.length-validSegs.length;
       if(validSegs.length>0){
+        pushUndo(); // v0.0376 Fix1: 確定直前にpushUndo
         validSegs.forEach(seg=>{
           const area=calcAreaPts(seg.outer);
           shapes.push({type:'poly',outer:seg.outer,holes:seg.holes||[],area,color:currentToolColor});
         });
         const prevTool=tool;cur=null;
         updSidebar();
+        const rmMsg=removedCount>0?` (極小片${removedCount}個を自動削除)`:'';
         if(validSegs.length>1){
-          toast(`✂ 自己交差を検出 → ${validSegs.length}図形に自動分割しました`);
+          toast(`✂ 自己交差を検出 → ${validSegs.length}図形に自動分割しました${rmMsg}`);
         }else{
-          toast(`✅ 自己交差を自動補正しました — ${validSegs[0].area.toFixed(2)} m²`);
+          toast(`✅ 自己交差を自動補正しました — ${calcAreaShape({outer:validSegs[0].outer,holes:validSegs[0].holes||[]}).toFixed(2)} m²${rmMsg}`);
         }
         if(rectLoop&&prevTool==='rect'){cur={pts:[]};redraw();return;}
-        showSnap(null);drawing=false;tool=null;lastSnap=null;setStatus('');
+        setStatus('');drawing=false;tool=null;lastSnap=null;
         document.getElementById('cv-wrap').classList.remove('drawing-mode');
-        // v0.0362 Fix1: inline styleもリセット
         ['rect-btn','poly-btn'].forEach(id=>{
           const _b=document.getElementById(id);
           if(_b){_b.classList.remove('on');_b.style.background='';_b.style.borderColor='';_b.style.color='';}
         });
+        currentToolColor='blue';showSnap(null);
         redraw();
         return;
+      } else {
+        // v0.0378 Fix1: cancelDraw()をinline展開して確実にリセット
+        drawing=false;cur=null;rectLoop=false;tool=null;
+        document.getElementById('cv-wrap').classList.remove('drawing-mode');
+        ['rect-btn','poly-btn'].forEach(id=>{
+          const _b=document.getElementById(id);
+          if(_b){_b.classList.remove('on');_b.style.background='';_b.style.borderColor='';_b.style.color='';}
+        });
+        currentToolColor='blue';lastSnap=null;showSnap(null);setStatus('');
+        redraw();toast('⚠ 面積が小さすぎます（自動削除）');return;
       }
     }
-    // 分割失敗 → 警告付きで従来通り登録
+    // v0.0376 Fix2: 分割失敗でも0面積なら登録しない
+    if(calcAreaShape(sh)<0.005){
+      // v0.0378 Fix1: cancelDraw()をinline展開して確実にリセット
+      drawing=false;cur=null;rectLoop=false;tool=null;
+      document.getElementById('cv-wrap').classList.remove('drawing-mode');
+      ['rect-btn','poly-btn'].forEach(id=>{
+        const _b=document.getElementById(id);
+        if(_b){_b.classList.remove('on');_b.style.background='';_b.style.borderColor='';_b.style.color='';}
+      });
+      currentToolColor='blue';lastSnap=null;showSnap(null);setStatus('');
+      redraw();toast('⚠ 面積が小さすぎます（0.01m²以下は作成不可）');return;
+    }
     sh.selfIntersect=true;sh.name='！'+getShapeName(sh,shapes.length);
   }
+  pushUndo(); // v0.0376 Fix1: 確定直前にpushUndo
   shapes.push(sh);
   const prevTool=tool;cur=null;
   updSidebar();
@@ -2622,6 +2805,7 @@ function finishShape(){
     const _b=document.getElementById(id);
     if(_b){_b.classList.remove('on');_b.style.background='';_b.style.borderColor='';_b.style.color='';}
   });
+  currentToolColor='blue'; // v0.0373 Fix2: 色リセット漏れ補完
   redraw();
 }
 
@@ -2671,7 +2855,7 @@ function setDistMode(on){
   // v0.0316: dist-warn-bar はsetStatusに統合、直接操作しない
   const dr=document.getElementById('dist-result');
   if(!on){
-    dr.style.display='none';distPts=[];lastSnap=null;setStatus('');
+    dr.style.display='none';distPts=[];distTotal=0;distHistory=[];distSegments=[];lastSnap=null;setStatus('');
     if(tTimer){clearTimeout(tTimer);tTimer=null;} // v0.0337 Fix3
     const _td=document.getElementById('toast');if(_td){_td.className='';_td.textContent='';}
     redraw();
@@ -2690,7 +2874,34 @@ function setScCalMode(on,keepPts){
     if(drawing)cancelDraw();
     if(selUnionMode)setSelUnionMode(false);
     if(subMode)setSubMode(false);
-    if(distMode)setDistMode(false);
+    // v0.0384 Fix1: 距離モード中は右クリックで1点戻る
+    if(distMode){
+      if(distHistory.length>1){
+        distHistory.pop();
+        if(distSegments.length>0){distTotal-=distSegments.pop();if(distTotal<0)distTotal=0;}
+        distPts=distHistory.length>=1?[distHistory[distHistory.length-1]]:[];
+        if(distSegments.length>0){
+          const _dv=distSegments[distSegments.length-1];
+          const _mpp=scaleDenom?(25.4/72)*scaleDenom/1000/RS:0;
+          const _dvStr=_mpp?`${_dv.toFixed(3)} m`:`-- px`;
+          const _totStr=_mpp?`${distTotal.toFixed(3)} m`:'--';
+          const _bs="font-size:.8em;padding:1px 7px;border-radius:4px;border:1px solid #0af;background:rgba(0,170,255,.15);color:#0af;cursor:pointer;pointer-events:auto;transition:background .1s,transform .1s;";
+          const _cpFn=(val)=>`event.stopPropagation();navigator.clipboard.writeText('${val}');this.style.background='rgba(0,170,255,.55)';this.style.transform='scale(.93)';this.textContent='✓';setTimeout(()=>{this.style.background='rgba(0,170,255,.15)';this.style.transform='';this.textContent='コピー';},600);`;
+          setStatus(
+            `📏 区間: <b>${_dvStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_dvStr)}" style="${_bs}">コピー</button>`+
+            `　　累計: <b>${_totStr}</b> <button onmousedown="event.stopPropagation()" onmouseup="event.stopPropagation()" onclick="${_cpFn(_totStr)}" style="${_bs}">コピー</button>`+
+            `　　<span style="opacity:.7;font-size:.9em;">右クリック：1回戻る　/　ESC：測定モード終了</span>`+
+            `
+⚠ 注意：PDF図面の上の数値、サイズはCADと違い正確ではありません`
+          );
+        } else {
+          setStatus('📏 距離計測：次の点をクリック（SHIFTで直交モード）\n右クリック：1回戻る　/　ESC：測定モード終了');
+        }
+        redraw();return;
+      } else {
+        setDistMode(false);toast('↩ 距離計測をキャンセル',800);return;
+      }
+    }
     if(btn)btn.classList.add('on');
     setStatus('📐 手動縮尺調整: 1点目をクリック（SHIFTで直交モード）');
     toast('📐 正確な寸法がわかる2点をクリックしてください\n（SHIFTキーで直交モード）',3500);
@@ -3162,36 +3373,32 @@ function redraw(mx,my,mode){
       drawCtx.restore();
     }
   }
-  // Fix2: 距離計測 — 確定済み区間の実線 + ゴムライン
-  if(distMode&&distPts.length>0){
-    // 確定済み区間を実線で描画（2点以上あれば1点目→2点目を常時表示）
-    if(distPts.length>=2){
-      drawCtx.save();
+  // Fix2: 距離計測 — 累積軌跡の実線 + ゴムライン (v0.0381刷新)
+  if(distMode&&(distHistory.length>0||distPts.length>0)){
+    drawCtx.save();
+    // v0.0381: 累積軌跡を全て実線で描画（固定2px）
+    if(distHistory.length>=2){
       drawCtx.beginPath();
-      drawCtx.moveTo(distPts[0].x,distPts[0].y);
-      drawCtx.lineTo(distPts[1].x,distPts[1].y);
-      drawCtx.strokeStyle='#cc4400';drawCtx.lineWidth=2;
+      drawCtx.moveTo(distHistory[0].x,distHistory[0].y);
+      for(let i=1;i<distHistory.length;i++)drawCtx.lineTo(distHistory[i].x,distHistory[i].y);
+      drawCtx.strokeStyle='#ff6600';drawCtx.lineWidth=3.5/zoom;drawCtx.setLineDash([]);
       drawCtx.stroke();
-      drawCtx.restore();
     }
-    // 全確定点をドットで表示
-    distPts.forEach(pt=>{
-      drawCtx.save();
-      drawCtx.beginPath();drawCtx.arc(pt.x,pt.y,6,0,Math.PI*2);
-      drawCtx.fillStyle='#cc4400';drawCtx.fill();
+    // 累積軌跡の各点をドットで表示
+    distHistory.forEach(pt=>{
+      drawCtx.beginPath();drawCtx.arc(pt.x,pt.y,5/zoom,0,Math.PI*2);
+      drawCtx.fillStyle='#ff6600';drawCtx.fill();
       drawCtx.strokeStyle='#fff';drawCtx.lineWidth=1.5;drawCtx.stroke();
-      drawCtx.restore();
     });
-    // 最終点からマウスへのゴムライン（点線）
-    if(mx!==undefined&&my!==undefined&&mode==='dist'){
-      const lastDist=distPts[distPts.length-1];
-      drawCtx.save();
-      drawCtx.beginPath();drawCtx.moveTo(lastDist.x,lastDist.y);
+    // 最終点からマウスへのゴムライン（点線・固定2.5px）
+    const lastDistPt=distHistory.length>0?distHistory[distHistory.length-1]:distPts[distPts.length-1];
+    if(lastDistPt&&mx!==undefined&&my!==undefined&&mode==='dist'){
+      drawCtx.beginPath();drawCtx.moveTo(lastDistPt.x,lastDistPt.y);
       drawCtx.lineTo(mx,my);
-      drawCtx.strokeStyle='#cc4400';drawCtx.lineWidth=1.5;
-      drawCtx.setLineDash([6,4]);drawCtx.stroke();drawCtx.setLineDash([]);
-      drawCtx.restore();
+      drawCtx.strokeStyle='#ff6600';drawCtx.lineWidth=3.5/zoom;
+      drawCtx.setLineDash([8/zoom,5/zoom]);drawCtx.stroke();drawCtx.setLineDash([]);
     }
+    drawCtx.restore();
   }
   // プレビュー
   if(drawing&&cur){
@@ -3214,7 +3421,7 @@ function drawShape(sh,selected,subBaseHl,subTgtHl,subBaseColor,hoverPulse){
   const fill=selected?'rgba(255,60,60,.25)':subBaseHl?'rgba(255,60,60,.2)':subTgtHl?baseClr.fill.replace(/[\d.]+\)$/,'0.35)'):clr.fill;
   const stroke=selected?'rgba(255,60,60,.95)':subBaseHl?'rgba(255,60,60,.9)':subTgtHl?baseClr.stroke:clr.stroke;
   // v0.0339 Fix7: 線幅はzoom非依存(固定px)
-  const lw=(selected||subBaseHl||subTgtHl?2.5:1.5)/zoom;
+  const lw=(selected||subBaseHl||subTgtHl?3:2)/zoom; // zoom非依存(固定px)
   // ホバーパルス効果
   const isHover=hoverPulse!==undefined&&hoverPulse>=0;
   const pulse=isHover?hoverPulse:0; // 0.0〜1.0のsin波
@@ -3267,8 +3474,8 @@ function drawShape(sh,selected,subBaseHl,subTgtHl,subBaseColor,hoverPulse){
     drawCtx.moveTo(hole[0].x,hole[0].y);
     for(let i=1;i<hole.length;i++)drawCtx.lineTo(hole[i].x,hole[i].y);
     drawCtx.closePath();
-    drawCtx.strokeStyle='rgba(255,150,0,.8)';drawCtx.lineWidth=1.5/zoom; // v0.0339 Fix7
-    drawCtx.setLineDash([4,3]);drawCtx.stroke();drawCtx.setLineDash([]);
+    drawCtx.strokeStyle=stroke;drawCtx.lineWidth=2.5/zoom; // v0.0384 Fix3: オブジェクトカラーに合わせる
+    drawCtx.setLineDash([6/zoom,4/zoom]);drawCtx.stroke();drawCtx.setLineDash([]);
   });
   // 頂点ドット（outer）
   for(const p of outer){
@@ -3292,12 +3499,12 @@ function drawPolyPrev(mx,my){
   drawCtx.closePath();
   drawCtx.fillStyle='rgba(255,60,0,.2)';
   drawCtx.strokeStyle='rgba(255,90,60,.9)';
-  drawCtx.lineWidth=1.5/zoom;drawCtx.setLineDash([5/zoom,3/zoom]); // v0.0339 Fix7
+  drawCtx.lineWidth=2/zoom;drawCtx.setLineDash([6/zoom,4/zoom]); // zoom非依存(固定px)
   drawCtx.fill();drawCtx.stroke();drawCtx.setLineDash([]);
   if(mx!==undefined&&pts.length>=2){
     drawCtx.beginPath();drawCtx.moveTo(px,py);drawCtx.lineTo(pts[0].x,pts[0].y);
-    drawCtx.strokeStyle='rgba(255,200,0,.3)';drawCtx.lineWidth=1/zoom;
-    drawCtx.setLineDash([3,4]);drawCtx.stroke();drawCtx.setLineDash([]);
+    drawCtx.strokeStyle='rgba(255,200,0,.3)';drawCtx.lineWidth=1.5/zoom;
+    drawCtx.setLineDash([4/zoom,5/zoom]);drawCtx.stroke();drawCtx.setLineDash([]);
   }
   if(pts.length>=3){
     drawCtx.beginPath();drawCtx.arc(pts[0].x,pts[0].y,6,0,Math.PI*2);
