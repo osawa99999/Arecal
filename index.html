@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AreCal v0.0384</title>
+<title>AreCal v0.0385</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -82,6 +82,7 @@ body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);
 }
 .hist-btn:disabled{opacity:.35;cursor:default;}
 /* Subtract */
+#rect-btn,#poly-btn,#sel-union-btn,#sub-btn,#dist-btn,#survey-btn,#io-btn{color:#e8e8e8 !important;}
 #sub-btn{
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);
   border-radius:4px;cursor:pointer;color:rgba(255,255,255,.75);
@@ -749,6 +750,7 @@ select#sc-select{
 // ================================================================
 //  AreCal v0.0371
 //  --- 今セッション変更履歴 ---
+//  v0.0385  Fix1:四角形ステータスに「Shiftで正方形」表示(3か所) Fix2:多角形右クリックstatus更新(点数・1点以下キャンセル説明) Fix3:ツールボタン7個の文字色を白系(#e8e8e8)に統一
 //  v0.0384  Fix1:距離右クリック1点戻りをcontextmenuハンドラに正しく実装
 //           Fix2:距離ボタンラベルを「距離測定」に変更
 //           Fix3:穴の点線色をオブジェクトカラーに合わせる
@@ -1770,10 +1772,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(drawing&&tool==='rect'){
       if(e.key==='ArrowUp'){e.preventDefault();rectAngle=(rectAngle+0.5)%360;
         const _ra1=rectAngle%180;const _warn1=(_ra1>1&&_ra1<89)?'　⚠ 小さい長方形を回転させると計算が難しいんで面積に数％の誤差が出ます':'';
-        setStatus(`⬛ 四角形：2点クリック　角度:${rectAngle.toFixed(1)}°${_warn1}`);redraw(lastMouseX,lastMouseY);return;}
+        setStatus(`⬛ 四角形：2点クリック　Shiftで正方形　角度:${rectAngle.toFixed(1)}°${_warn1}`);redraw(lastMouseX,lastMouseY);return;}
       if(e.key==='ArrowDown'){e.preventDefault();rectAngle=(rectAngle-0.5+360)%360;
         const _ra2=rectAngle%180;const _warn2=(_ra2>1&&_ra2<89)?'　⚠ 小さい長方形を回転させると計算が難しいんで面積に数％の誤差が出ます':'';
-        setStatus(`⬛ 四角形：2点クリック　角度:${rectAngle.toFixed(1)}°${_warn2}`);redraw(lastMouseX,lastMouseY);return;}
+        setStatus(`⬛ 四角形：2点クリック　Shiftで正方形　角度:${rectAngle.toFixed(1)}°${_warn2}`);redraw(lastMouseX,lastMouseY);return;}
     }
     // v0.0333: Fix8 Delキーで選択中オブジェクト削除
     if(e.key==='Delete'||e.key==='Backspace'){
@@ -1842,7 +1844,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(drawing&&tool==='poly'&&cur&&cur.pts.length>0){
       cur.pts.pop();
       if(cur.pts.length===0){cancelDraw();toast('↩ 多角形をキャンセル');}
-      else{redraw();toast(`↩ 点を削除（残り${cur.pts.length}点）`);}
+      else{
+        redraw();toast(`↩ 点を削除（残り${cur.pts.length}点）`);
+        if(cur.pts.length===1){setStatus('🔵 多角形：右クリックでキャンセル　クリックで点追加');}
+        else{setStatus(`🔵 多角形：${cur.pts.length}点　右クリックで1点戻る　ダブルクリック / Enter で確定`);}
+      }
       return;
     }
     // 6: 右クリック＝全ツールOFF＋選択解除
@@ -2467,8 +2473,8 @@ function startTool(t){
   const _sBt=_sColText[currentToolColor]||'#fff';
   const _actBtn=document.getElementById(t==='rect'?'rect-btn':'poly-btn');
   if(_actBtn){_actBtn.style.background=_sBh;_actBtn.style.borderColor=_sBh;_actBtn.style.color=_sBt;}
-  if(t==='rect'){rectLoop=true;rectAngle=0;setStatus('⬛ 四角形：2点クリック　↑↓キーで角度変更　右クリックでキャンセル');}
-  else{setStatus('🔵 多角形：クリックで点追加　ダブルクリック / Enter で確定　右クリックでキャンセル');}
+  if(t==='rect'){rectLoop=true;rectAngle=0;setStatus('⬛ 四角形：2点クリック　Shiftで正方形　↑↓キーで角度変更　右クリックでキャンセル');}
+  else{setStatus('🔵 多角形：クリックで点追加　右クリックで1点戻る / 1点以下でキャンセル　ダブルクリック / Enter で確定');}
 }
 function cancelDraw(){
   drawing=false;cur=null;rectLoop=false;tool=null;
