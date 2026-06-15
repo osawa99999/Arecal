@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AreCal v0.0385</title>
+<title>AreCal v0.0386</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.12.313/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -611,7 +611,7 @@ select#sc-select{
           <button class="io-sub-btn" id="pdf-exp-btn">🖨 PDF出力</button>
         </div>
       </div>
-      <input type="file" id="imp-in" accept=".json" style="display:none">
+      <input type="file" id="imp-in" accept=".arec,.json" style="display:none">
     </div>
 
     <!-- 色別表示フィルター -->
@@ -2065,15 +2065,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
     // スナップ点に近い場合（描画中のみ）
     if((drawing||distMode||scCalMode)&&lastSnap){
-      const typeNames={endpoint:'端点',midpoint:'中点',online:'線上',intersect:'交点'};
-      tip.textContent=typeNames[lastSnap.type]||lastSnap.type; // v0.0332: 短縮
+      const typeNames={endpoint:'端点',midpoint:'中点',online:'線上',intersect:'交点',first:'始点'};
+      tip.textContent='Snap! ('+(typeNames[lastSnap.type]||lastSnap.type)+')'; // v0.0386: Snap!表示に統一
       tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';
       return;
     }
     // v0.0332: surveyMode 中もスナップ名表示
     if(surveyMode&&lastSnap){
-      const typeNames2={endpoint:'端点',midpoint:'中点',online:'線上',intersect:'交点'};
-      tip.textContent=typeNames2[lastSnap.type]||lastSnap.type;
+      const typeNames2={endpoint:'端点',midpoint:'中点',online:'線上',intersect:'交点',first:'始点'};
+      tip.textContent='Snap! ('+(typeNames2[lastSnap.type]||lastSnap.type)+')'; // v0.0386: Snap!表示に統一
       tip.style.display='block';tip.style.left=(e.clientX+14)+'px';tip.style.top=(e.clientY-10)+'px';
       return;
     }
@@ -3791,7 +3791,7 @@ function saveJSON(){
   const data=JSON.stringify({_app:'AreCal',version:'0.0300',scale:sc,shapes:saveData},null,0); // v0.0335
   const a=document.createElement('a');
   a.href='data:application/json;charset=utf-8,'+encodeURIComponent(data);
-  a.download='AreCal_'+getTs()+'_data.json';a.click(); // v0.0335: ファイル名にAreCal追加
+  a.download='AreCal_'+getTs()+'_data.arec';a.click(); // v0.0386: 拡張子をarecに変更（姉妹ソフトVoldiamとの区別用）
   toast('💾 保存完了（JSON）');
 }
 function loadJSON(e){
