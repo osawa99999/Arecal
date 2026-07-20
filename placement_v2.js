@@ -2,6 +2,21 @@
  * placement.js — AreCal 配置モード拡張 v0.9.32
  *
  * [最新の変更]
+ * v0.0039:
+ *   - 3) 正式CalayMachineryData.datで実データ確認。「平面」の重機・車両カテゴリのうちrotate系
+ *     (バックホー/クローラー等)はcolor_svgを持たないが、drawMachinery側は元々rotate/array系の
+ *     upper_svgにも常にfillColor(ann.color)を適用して描画していた(renderRotate/renderArray等)。
+ *     つまり色変更自体は描画パイプライン上は既に効くのに、左パネルのhasHatch判定がcolor_svgの
+ *     有無だけを見ていたため、これらの資産だけ色変更UIが「×」(変更不可)表示になっていた。
+ *     hasHatch判定にupper_svgの有無も追加し、該当アセットでも色変更ボタンが有効になるよう修正。
+ *     (static系はupper_svgを持たないため従来通りcolor_svgの有無のみで判定)
+ * v0.0038:
+ *   - 3) 左パネルの配置済みリストで、ハッチング無し図形の「×」表示(pm-color-none)がliのクリック
+ *     (選択)処理から除外されていなかったのを修正(pm-color-dotと同様に除外)。
+ *     ただし報告された「表示切替と色変更の両方が表示切替として動作する」という主症状は、
+ *     現状のコード(pm-vis-btn/pm-color-dotは別要素・別ハンドラで、双方ともev.stopPropagation()済み)
+ *     を読む限り再現条件を特定できず。CalayMachineryData.datが現在ダミー(空)のため実データでの
+ *     確認ができていない。正式dat到着後、該当の「平面」「重機・車両」アセットで再現するか要確認。
  * v0.0037:
  *   - 17) 画面外表示エリア拡張、Arecalay側対応。pmCvの見た目サイズ/位置/transformをAreCal本体の
  *     draw-cv(_CPAD拡張済み)に追従させ、renderPmLayer冒頭でpmCtx.translate(pmCpad,pmCpad)して
@@ -87,7 +102,7 @@
 (function () {
   'use strict';
 
-  const ARECALAY_VER = '0.0037';
+  const ARECALAY_VER = '0.0039';
   window._pmVersion = ARECALAY_VER;
   const COLORS      = ['#ff4081','#e8a020','#188C1C','#1B3EAB','#aaaaaa','#ff8c00','#111111'];
   const PM_UNDO_MAX = 30;
@@ -2929,9 +2944,14 @@
         const szLabel = curSz === 1 ? '×1' : `×${curSz}`;
         const vis     = ann.visibility || 'visible';
         const [visIcon, visCol] = vis==='hidden'?['✕','#f55']:vis==='translucent'?['◑','#e8a020']:['●','#4c4'];
-        // ハッチング(color_svg)を持たないオブジェクトは色変更不可。「色〇」の代わりに「×」表示で明示する
+        // v0.0412: 3) 色変更可否の判定を修正。color_svgが無くても、rotate/array系のupper_svgは
+        // renderRotate/renderArray等で常にfillColor(ann.color)が適用される(下記drawMachinery参照)ため、
+        // upper_svgがあれば色変更可能。static系はupper_svgを持たないためcolor_svgの有無だけで判定される。
         const asset    = machineryData[ann.assetId];
-        const hasHatch = !!(asset && asset.color_svg && asset.color_svg.trim());
+        const hasHatch = !!(asset && (
+          (asset.color_svg && asset.color_svg.trim()) ||
+          (asset.upper_svg && asset.upper_svg.trim())
+        ));
         const colorCell = hasHatch
           ? `<span class="pm-color-dot" data-uuid="${ann.uuid}"
               style="width:11px;height:11px;border-radius:50%;flex-shrink:0;cursor:pointer;
@@ -3038,7 +3058,7 @@
 
     list.querySelectorAll('li[data-uuid]').forEach(li => {
       li.addEventListener('click', ev => {
-        if (['pm-del-btn','pm-color-dot','pm-step-dn','pm-step-up','pm-mach-sz']
+        if (['pm-del-btn','pm-color-dot','pm-color-none','pm-step-dn','pm-step-up','pm-mach-sz']
             .some(c=>ev.target.classList.contains(c))) return;
         const uuid = li.dataset.uuid;
         if (ev.shiftKey) {
