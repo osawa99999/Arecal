@@ -2,6 +2,19 @@
  * placement.js — AreCal 配置モード拡張 v0.9.32
  *
  * [最新の変更]
+ * v0.0041:
+ *   - 2) 距離測定モード中に矢印/線/円/図形ボタンを押すと両方同時に有効になり、クリックのたびに
+ *     2つの機能が競合するバグを修正。setAnnotMode()で別ツールへ切り替える際、距離測定がONなら
+ *     window.setDistMode(false)で強制OFFにするようにした。
+ *   - 3) 距離測定の実線・ゴムラインをArecalayのオブジェクトレイヤー(pmCv、z-index的に最前面)にも
+ *     描画するようにし、Arecalayの図形と重なっても常に手前に見えるようにした。AreCal本体側に
+ *     window._getDistPoints()を追加して点列を取得。
+ *   - 3) 距離測定モード中はオブジェクトへのマウスホバーによるカーソル変化(grab/pointer/move)を
+ *     停止し、常に十字カーソルを維持するようにした。
+ * v0.0040:
+ *   - 4) 距離測定モード中、Arecalayのオブジェクト選択(hitTestCSS)が優先されてしまい距離が
+ *     測れないバグを修正。window._isDistModeOn()がtrueの間はArecalay側の選択処理を完全に
+ *     スキップし、クリックをそのままAreCal本体の距離測定処理に渡すようにした。
  * v0.0039:
  *   - 3) 正式CalayMachineryData.datで実データ確認。「平面」の重機・車両カテゴリのうちrotate系
  *     (バックホー/クローラー等)はcolor_svgを持たないが、drawMachinery側は元々rotate/array系の
@@ -102,7 +115,7 @@
 (function () {
   'use strict';
 
-  const ARECALAY_VER = '0.0039';
+  const ARECALAY_VER = '0.0041';
   window._pmVersion = ARECALAY_VER;
   const COLORS      = ['#ff4081','#e8a020','#188C1C','#1B3EAB','#aaaaaa','#ff8c00','#111111'];
   const PM_UNDO_MAX = 30;
@@ -146,6 +159,7 @@
   let pdfCvLeft     = 0;
   let pdfCvTop      = 0;
   let pmCpad        = 0; // v0.0411: 17) syncPmCvで確定する実際の描画オフセット量(draw-cv追従時のみ_CPAD、それ以外0)
+  let _pmLastMouseCX = null, _pmLastMouseCY = null; // v0.0413: 3) 距離測定ゴムラインをpmCv側に描画するための現在マウス位置
   let selectedUuids = new Set();
   let defArrowStep  = 1;
   let defLineStep   = 1;
@@ -457,6 +471,8 @@
       if (typeof window.setDistMode === 'function') {
         const on = typeof window._isDistModeOn === 'function' ? window._isDistModeOn() : false;
         window.setDistMode(!on);
+        // v0.0413: 3) 距離測定ON時は即座に十字カーソルに、OFF時は通常カーソルに戻す
+        pmCv.style.cursor = !on ? 'crosshair' : 'default';
       }
     };
 
@@ -660,6 +676,10 @@
         if (annotMode) {
           e.stopPropagation();
           handleCanvasClick(e);
+        } else if (typeof window._isDistModeOn === 'function' && window._isDistModeOn()) {
+          // v0.0413: 4) 距離測定モード中はArecalayのオブジェクト選択を完全に無効化し、
+          // クリックをそのままAreCal本体の距離測定処理に渡す(選択が優先されて測定できないバグの修正)
+          return;
         } else {
           const hit = hitTestCSS(e.clientX-pdfCvLeft, e.clientY-pdfCvTop);
           if (hit) {
@@ -672,6 +692,7 @@
 
     document.addEventListener('mousemove', function(e) {
       if (!placementMode) return;
+      _pmLastMouseCX = e.clientX; _pmLastMouseCY = e.clientY; // v0.0413: 3)
       if (dragState) {
         e.stopPropagation();
         handleDragMove(e);
@@ -702,7 +723,13 @@
         return;
       }
       if (!annotMode) {
-        updateHoverCursor(e);
+        // v0.0413: 3) 距離測定モード中はオブジェクトホバーによるカーソル変化(grab/pointer/move等)を
+        // 一切行わず、常に十字カーソルを維持する
+        if (typeof window._isDistModeOn === 'function' && window._isDistModeOn()) {
+          pmCv.style.cursor = 'crosshair';
+        } else {
+          updateHoverCursor(e);
+        }
       }
     }, {capture:true});
 
@@ -794,6 +821,13 @@
     annotMode = (annotMode===mode) ? null : mode;
     if (annotMode !== 'machinery') selectedAssetId = null;
     arrowStart=null; lineStart=null; previewPos=null;
+
+    // v0.0413: 2) 距離測定モード中に矢印/線/円/テキスト/図形ボタンを押すと両方同時に有効になり
+    // クリックのたびに2つの機能が競合するバグを修正。別ツールへ切り替える際は距離測定を強制OFFにする
+    if (annotMode && typeof window._isDistModeOn === 'function' && window._isDistModeOn()
+        && typeof window.setDistMode === 'function') {
+      window.setDistMode(false);
+    }
 
     if (annotMode === 'arrow' || annotMode === 'text' || annotMode === 'line' || annotMode === 'circle') {
       closeMachineryPicker();
@@ -1862,6 +1896,42 @@
         pmCtx.save();
         pmCtx.globalAlpha = 0.5;
         drawMachinery(previewAnn, false, false);
+        pmCtx.restore();
+      }
+    }
+    // v0.0413: 3) 距離測定の仮想線(ゴムライン)・累積軌跡をpmCv側にも描画して最前面化する。
+    // pmCv(z-index:11)はdraw-cv(z-index:10、AreCal本体の距離測定はここに描画される)より手前なので、
+    // ここで描き直すことでArecalayの図形と重なっても距離測定線が常に見えるようにする
+    if (typeof window._isDistModeOn === 'function' && window._isDistModeOn()
+        && typeof window._getDistPoints === 'function') {
+      const {pts: dPts, history: dHist} = window._getDistPoints() || {};
+      if ((dHist && dHist.length) || (dPts && dPts.length)) {
+        const {zoom: dz} = getState();
+        pmCtx.save();
+        if (dHist && dHist.length >= 2) {
+          pmCtx.beginPath();
+          pmCtx.moveTo(dHist[0].x, dHist[0].y);
+          for (let i = 1; i < dHist.length; i++) pmCtx.lineTo(dHist[i].x, dHist[i].y);
+          pmCtx.strokeStyle = '#ff6600'; pmCtx.lineWidth = 3.5 / Math.max(dz, 0.005);
+          pmCtx.setLineDash([]); pmCtx.stroke();
+        }
+        (dHist || []).forEach(pt => {
+          pmCtx.beginPath(); pmCtx.arc(pt.x, pt.y, 5 / Math.max(dz, 0.005), 0, Math.PI*2);
+          pmCtx.fillStyle = '#ff6600'; pmCtx.fill();
+          pmCtx.strokeStyle = '#fff'; pmCtx.lineWidth = 1.5 / Math.max(dz, 0.005); pmCtx.stroke();
+        });
+        const lastPt = (dHist && dHist.length) ? dHist[dHist.length-1]
+                     : (dPts && dPts.length ? dPts[dPts.length-1] : null);
+        if (lastPt && _pmLastMouseCX != null) {
+          const mPos = getLogical({ clientX:_pmLastMouseCX, clientY:_pmLastMouseCY });
+          const {cx: mcx, cy: mcy} = l2c(mPos.lx, mPos.ly);
+          pmCtx.beginPath();
+          pmCtx.moveTo(lastPt.x, lastPt.y);
+          pmCtx.lineTo(mcx, mcy);
+          pmCtx.strokeStyle = '#ff6600'; pmCtx.lineWidth = 3.5 / Math.max(dz, 0.005);
+          pmCtx.setLineDash([8/Math.max(dz,0.005), 5/Math.max(dz,0.005)]);
+          pmCtx.stroke(); pmCtx.setLineDash([]);
+        }
         pmCtx.restore();
       }
     }
