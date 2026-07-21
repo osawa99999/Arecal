@@ -460,13 +460,14 @@
       }
     };
 
-    // v0.0408: AreCal本体と同じ「入出力」展開メニューに統一
+    // v0.0412: 4) AreCal本体と同様、入出力メニューを開いている間は他の配置ツールを操作不可にする
     pmRightPanel.querySelector('#pm-io-btn').onclick = () => {
       pmIoMenuOpen = !pmIoMenuOpen;
       pmRightPanel.querySelector('#pm-io-menu').style.display = pmIoMenuOpen ? 'block' : 'none';
       if (pmIoMenuOpen) {
         cancelAnnotMode();
         closeMachineryPicker();
+        _lockPmToolButtons(true);
       } else {
         closePmIoMenu();
       }
@@ -942,6 +943,28 @@
     _renderMachineryGrid(dlg, _mpLastCat, _mpLastDiv);
   }
 
+  // v0.0412: 4) 入出力メニューを開いている間にロックする対象ボタン(AreCal本体の_IO_LOCK_BTNS相当)
+  const _PM_IO_LOCK_BTNS = ['pm-arrow-btn','pm-text-btn','pm-line-btn','pm-circle-btn',
+    'pm-machinery-btn','pm-dist-btn','pm-undo-btn','pm-redo-btn','pm-vistype-btn',
+    'pm-copy-btn','pm-clear-btn'];
+  function _ensurePmLockStyle() {
+    if (document.getElementById('pm-lock-style')) return;
+    const s = document.createElement('style');
+    s.id = 'pm-lock-style';
+    // !important付与。他のインラインstyle/CSSに左右されず確実にグレーアウトさせるため
+    s.innerHTML = `.pm-locked{opacity:.35 !important;filter:grayscale(60%) !important;
+      pointer-events:none !important;cursor:not-allowed !important;}`;
+    document.head.appendChild(s);
+  }
+  function _lockPmToolButtons(lock) {
+    _ensurePmLockStyle();
+    _PM_IO_LOCK_BTNS.forEach(id => {
+      const el = (pmRightPanel && pmRightPanel.querySelector('#'+id)) || document.getElementById(id);
+      if (!el) return;
+      el.disabled = lock;
+      el.classList.toggle('pm-locked', lock);
+    });
+  }
   function closePmIoMenu() { // v0.0408
     pmIoMenuOpen = false; pmIoWriteOpen = false;
     const menu     = pmRightPanel.querySelector('#pm-io-menu');
@@ -950,6 +973,7 @@
     if (menu)     menu.style.display = 'none';
     if (writeSub) writeSub.style.display = 'none';
     if (writeBtn) writeBtn.classList.remove('active');
+    _lockPmToolButtons(false); // v0.0412: 4) ロック解除
   }
   // v0.0409: 種別表示（B3） — カテゴリ／注釈タイプ単位で表示状態(ON/半透明/OFF)を一括変更
   const PM_VISTYPE_DEFS = [
