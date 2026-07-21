@@ -151,7 +151,7 @@ body:not(.pdf-ready) #sb{filter:grayscale(80%);}
   width:min(600px,90vw);display:none; /* v0.0406: dat-gate解決までは非表示（既定はJSでdat-gateを先に出す） */
 }
 #drop-hint p{font-size:1.15em;margin-bottom:6px;}
-#drop-hint small{color:CACACA;}
+#drop-hint small{color:#CACACA;}
 #drop-hint .warn-box{
   margin-top:16px;padding:12px 16px;
   background:rgba(255,180,0,.1);
@@ -169,7 +169,7 @@ body:not(.pdf-ready) #sb{filter:grayscale(80%);}
   width:min(600px,90vw);display:none;
 }
 #dat-gate p{font-size:1.15em;margin-bottom:6px;color:#a5d6a7;}
-#dat-gate small{color:CACACA;}
+#dat-gate small{color:#CACACA;}
 #dat-gate .warn-box{
   margin-top:16px;padding:12px 16px;
   background:rgba(255,180,0,.1);
@@ -201,8 +201,8 @@ body:not(.pdf-ready) #sb{filter:grayscale(80%);}
     padding:10px 10px 160px;overflow-y:auto;display:flex;flex-direction:column;
     gap:7px;z-index:100;height:100%;box-sizing:border-box;}
 .card{background:#2a2a2a;border:1px solid var(--bdr);border-radius:6px;padding:9px 11px;}
-.card h4{font-size:.82em;color:CACACA;margin-bottom:7px;letter-spacing:.03em;}
-label{font-size:.78em;color:CACACA;}
+.card h4{font-size:.82em;color:#CACACA;margin-bottom:7px;letter-spacing:.03em;}
+label{font-size:.78em;color:#CACACA;}
 .row{display:flex;align-items:center;gap:6px;margin-top:5px;}
 input[type=text]{flex:1;padding:5px 8px;background:#333;color:var(--text);
                  border:1px solid var(--bdr);border-radius:4px;font-size:.83em;}
@@ -234,7 +234,7 @@ select#sc-select{
 #sc-custom-row2 .row{margin-top:3px;display:flex;gap:4px;align-items:center;}
 #sc-custom-row2 input{flex:1;min-width:0;} /* A3: overflow fix */
 
-.srow{display:flex;justify-content:space-between;font-size:.74em;color:CACACA;margin-top:5px;}
+.srow{display:flex;justify-content:space-between;font-size:.74em;color:#CACACA;margin-top:5px;}
 .srow b{color:var(--blue);}
 
 /* スナップ */
@@ -246,7 +246,7 @@ select#sc-select{
 .modal-c{background:var(--panel);margin:10% auto;padding:22px;
          border:1px solid var(--blue);width:340px;border-radius:8px;text-align:center;}
 .modal-c h3{margin-bottom:12px;}
-.modal-c p{color:CACACA;font-size:.85em;margin-bottom:10px;}
+.modal-c p{color:#CACACA;font-size:.85em;margin-bottom:10px;}
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px;}
 .sbtn{padding:4px 2px;font-size:.74em;border-radius:3px;}
 .sbtn.on{background:var(--blue);border-color:var(--blue);}
@@ -278,7 +278,7 @@ select#sc-select{
   box-shadow:0 4px 20px rgba(0,0,0,.7);backdrop-filter:blur(4px);
 }
 #rot-ctrl.active{display:flex;}
-#rot-ctrl label{font-size:.78em;color:CACACA;}
+#rot-ctrl label{font-size:.78em;color:#CACACA;}
 #rot-ang-display{
   font-size:1.6em;font-weight:700;color:#60c0ff;
   min-width:100px;text-align:center;letter-spacing:.03em;
@@ -303,7 +303,7 @@ select#sc-select{
 #rot-ok:hover{filter:brightness(1.2);}
 #rot-reset{
   padding:5px 10px;background:#333;border:1px solid #666;border-radius:4px;
-  color:CACACA;font-size:.78em;cursor:pointer;
+  color:#CACACA;font-size:.78em;cursor:pointer;
 }
 #rot-reset:hover{background:#444;}
 
@@ -363,7 +363,7 @@ select#sc-select{
 /* B-8: 端数調整ボタン */
 .sr-btn{
   padding:2px 8px;border-radius:3px;border:1px solid #555;
-  background:rgba(255,255,255,.06);color:CACACA;font-size:.72em;cursor:pointer;
+  background:rgba(255,255,255,.06);color:#CACACA;font-size:.72em;cursor:pointer;
 }
 .sr-btn.on{background:rgba(0,200,255,.2);border-color:#0af;color:#0af;}
 /* B-15: 左UI横並び */
@@ -381,13 +381,13 @@ select#sc-select{
 .sh-name{font-size:.75em;color:#ccc;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;}
 .sh-name.sel-hl{color:#80ffff;}
 .sh-name.warning{color:#ff9900;}
-.sh-area{font-size:.72em;color:CACACA;white-space:nowrap;margin-left:auto;flex-shrink:0;}
+.sh-area{font-size:.72em;color:#CACACA;white-space:nowrap;margin-left:auto;flex-shrink:0;}
 .delbtn{font-size:.65em;padding:1px 5px;flex-shrink:0;}
-#no-items{color:CACACA;font-size:.8em;text-align:center;padding:16px 0;}
+#no-items{color:#CACACA;font-size:.8em;text-align:center;padding:16px 0;}
 
 /* 入出力メニュー */
 .io-top-btn{
-  padding:6px 4px;background:rgba(80,120,200,.18);color:#aac;
+  padding:6px 4px;background:rgba(80,120,200,.18);color:#dde6ff;
   font-size:.78em;cursor:pointer;
 }
 .io-top-btn:hover{background:rgba(80,120,200,.35);}
@@ -437,7 +437,7 @@ select#sc-select{
 #sc-cal-dialog .cal-btns button{flex:1;padding:7px;}
 
 /* B7: PDF濃度スライダー */
-#pdf-opacity-wrap{margin-top:8px;font-size:.75em;color:CACACA;}
+#pdf-opacity-wrap{margin-top:8px;font-size:.75em;color:#CACACA;}
 #pdf-opacity-slider{width:100%;accent-color:var(--blue);cursor:pointer;}
 
 /* v0.0312: スナップ強調 */
@@ -567,7 +567,7 @@ select#sc-select{
         </select>
         <div id="sc-custom-row2">
           <div class="row">
-            <span style="color:CACACA;font-size:.9em;white-space:nowrap;">1 /</span>
+            <span style="color:#CACACA;font-size:.9em;white-space:nowrap;">1 /</span>
             <input type="text" id="sc-input" placeholder="75" style="text-align:center;">
             <button id="sc-set">設定</button>
           </div>
@@ -582,7 +582,7 @@ select#sc-select{
       <span id="zoom-d" style="display:none">100%</span>
       <!-- 端数調整 -->
       <div style="margin-top:6px;font-size:.72em;">
-        <span style="color:CACACA;">端数調整：</span>
+        <span style="color:#CACACA;">端数調整：</span>
         <span id="snap-round-btns" style="display:inline-flex;gap:4px;">
           <button id="sr-1" class="sr-btn" data-r="1">1</button>
           <button id="sr-5" class="sr-btn on" data-r="5">5</button>
@@ -647,7 +647,7 @@ select#sc-select{
         <button id="sn-intersect" class="on">交点</button>
       </div>
       <div style="margin-top:6px;">
-        <div style="display:flex;justify-content:space-between;font-size:.72em;color:CACACA;margin-bottom:2px;">
+        <div style="display:flex;justify-content:space-between;font-size:.72em;color:#CACACA;margin-bottom:2px;">
           <span>スナップ距離</span><span id="snap-px-val">5px</span>
         </div>
         <input type="range" id="snap-slider" min="4" max="10" value="5" style="width:100%;accent-color:var(--blue);">
@@ -655,8 +655,8 @@ select#sc-select{
     </div>
 
     <!-- 操作ガイド -->
-    <div class="card" style="font-size:.7em;color:CACACA;line-height:1.9;">
-      <b style="color:CACACA;">操作ガイド</b><br>
+    <div class="card" style="font-size:.7em;color:#CACACA;line-height:1.9;">
+      <b style="color:#CACACA;">操作ガイド</b><br>
       🔍 ホイール：ズーム<br>
       🖱 中クリック / Space＋ドラッグ：パン<br>
       🖱 中ダブルクリック：全体表示<br>
@@ -717,7 +717,7 @@ select#sc-select{
         <!-- Arecalay ロゴ（緑） -->
         <div id="tog-lbl-arecalay" style="
           font-size:.88em;font-weight:900;letter-spacing:.04em;
-          color:CACACA;text-shadow:none;
+          color:#CACACA;text-shadow:none;
           transition:color .25s,text-shadow .25s;
         ">Are<span id="tog-calay">calay</span></div>
 
@@ -763,7 +763,7 @@ select#sc-select{
     </div>
     <p style="margin-top:8px;">数値入力:</p>
     <div class="row" style="justify-content:center;margin-top:4px;">
-      <span style="color:CACACA;font-size:.9em;white-space:nowrap;">1 /</span>
+      <span style="color:#CACACA;font-size:.9em;white-space:nowrap;">1 /</span>
       <input type="number" id="sc-init-in" placeholder="75" min="1" step="0.1" style="width:48px;text-align:center;">
       <button id="sc-confirm">設定</button>
     </div>
@@ -785,7 +785,7 @@ select#sc-select{
 <div id="rot-modal" class="modal">
   <div class="modal-c">
     <h3>📐 図面の角度を調整しますか？</h3>
-    <p style="color:CACACA;font-size:.85em;margin-bottom:16px;">
+    <p style="color:#CACACA;font-size:.85em;margin-bottom:16px;">
       斜めにスキャンされた図面などを補正できます。
     </p>
     <div style="display:flex;gap:12px;justify-content:center;">
@@ -1530,13 +1530,13 @@ document.addEventListener('DOMContentLoaded',()=>{
       +SCALES.map(s=>`<button class="_scBtn" data-sc="${s}" style="padding:5px 2px;font-size:.8em;border-radius:4px;border:1px solid #446;background:#222;color:#adf;cursor:pointer;">${s}</button>`).join('')
       +`</div>`
       +`<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">`
-      +`<span style="color:CACACA;font-size:.85em;white-space:nowrap;">数値入力: 1/</span>`
+      +`<span style="color:#CACACA;font-size:.85em;white-space:nowrap;">数値入力: 1/</span>`
       +`<input id="_scManIn" type="number" placeholder="75" min="1" step="0.1" style="width:60px;padding:3px;background:#111;color:#fff;border:1px solid #446;border-radius:4px;">`
       +`<button id="_scOkBtn" style="padding:4px 14px;background:#1a55cc;border:1px solid #4488ff;color:#fff;border-radius:6px;cursor:pointer;font-size:.85em;">OK</button>`
       +`</div>`
       +`<p style="color:#7af;font-size:.78em;margin:0 0 12px;">選択: <span id="_scDialog_sel">未選択</span></p>`
       +`<div style="display:flex;gap:10px;justify-content:center;">`
-      +`<button id="_scCancelBtn" style="padding:7px 22px;background:#333;border:1px solid #666;color:CACACA;border-radius:6px;cursor:pointer;">キャンセル</button>`
+      +`<button id="_scCancelBtn" style="padding:7px 22px;background:#333;border:1px solid #666;color:#CACACA;border-radius:6px;cursor:pointer;">キャンセル</button>`
       +`<button id="_scManCalBtn" style="padding:7px 18px;background:#1a4a1a;border:1px solid #4a8a4a;color:#80e080;border-radius:6px;cursor:pointer;">📐 手動調整</button>`
       +`</div></div>`;
     d.style.display='flex';
@@ -4434,7 +4434,7 @@ function customConfirm(msg,onYes,onNo){
   d.innerHTML=`<div style="background:#1e1e2e;border:1px solid #4488cc;border-radius:10px;padding:28px 32px;min-width:320px;text-align:center;">`
     +`<p style="color:#cde;font-size:.97em;white-space:pre-wrap;margin:0 0 20px">${msg}</p>`
     +`<div style="display:flex;gap:12px;justify-content:center;">`
-    +`<button id="_cc_no" style="padding:8px 28px;background:#333;border:1px solid #666;color:CACACA;border-radius:6px;cursor:pointer">キャンセル</button>`
+    +`<button id="_cc_no" style="padding:8px 28px;background:#333;border:1px solid #666;color:#CACACA;border-radius:6px;cursor:pointer">キャンセル</button>`
     +`<button id="_cc_yes" style="padding:8px 28px;background:#1a55cc;border:1px solid #4488ff;color:#fff;border-radius:6px;cursor:pointer">OK</button>`
     +`</div></div>`;
   d.style.display='flex';
@@ -4867,7 +4867,7 @@ function _doExportPDF(_pdfWithLbl,mnX,mnY,mxX,mxY){
 <div id="sc-cal-dialog">
   <div class="cal-box">
     <h4>📐 手動縮尺調整</h4>
-    <p style="font-size:.8em;color:CACACA;margin:0 0 8px;">2点間の実際の距離を入力してください（単位: m）</p>
+    <p style="font-size:.8em;color:#CACACA;margin:0 0 8px;">2点間の実際の距離を入力してください（単位: m）</p>
     <p id="sc-cal-px-info" style="font-size:.78em;color:#88f;margin:0 0 6px;"></p>
     <input type="number" id="sc-cal-input" placeholder="例: 10.000" step="0.001" min="0.001">
     <div class="cal-btns">
@@ -4877,7 +4877,7 @@ function _doExportPDF(_pdfWithLbl,mnX,mnY,mxX,mxY){
   </div>
 </div>
 <div id="pdf-range-overlay" class=""></div>
-<div id="survey-dialog" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:8500;align-items:center;justify-content:center;"><div style="background:#1a1a2e;border:1px solid #00ccff;border-radius:10px;padding:22px 26px;width:290px;"><h4 style="color:#00eeff;margin:0 0 12px;font-size:.95em;">📍 測点を移動（基点から）</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;"><button id="sv-up" style="padding:8px;border-color:#00ccff;color:#00eeff;">↑ 上（+Y）</button><button id="sv-down" style="padding:8px;border-color:#00ccff;color:#00eeff;">↓ 下（-Y）</button><button id="sv-left" style="padding:8px;border-color:#00ccff;color:#00eeff;">← 左（-X）</button><button id="sv-right" style="padding:8px;border-color:#00ccff;color:#00eeff;">→ 右（+X）</button></div><label style="font-size:.8em;color:CACACA;">移動距離（m）</label><input type="number" id="sv-dist" placeholder="例: 5.000" step="0.001" min="0" style="width:100%;box-sizing:border-box;margin:4px 0 12px;"><div style="display:flex;gap:8px;"><button id="sv-cancel" style="flex:1;background:#333;">キャンセル</button><button id="sv-ok" style="flex:1;background:rgba(0,150,200,.4);border-color:#00ccff;color:#00eeff;">設置</button></div></div></div><div class="survey-tip" id="survey-tip">右クリックで削除</div>
+<div id="survey-dialog" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:8500;align-items:center;justify-content:center;"><div style="background:#1a1a2e;border:1px solid #00ccff;border-radius:10px;padding:22px 26px;width:290px;"><h4 style="color:#00eeff;margin:0 0 12px;font-size:.95em;">📍 測点を移動（基点から）</h4><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;"><button id="sv-up" style="padding:8px;border-color:#00ccff;color:#00eeff;">↑ 上（+Y）</button><button id="sv-down" style="padding:8px;border-color:#00ccff;color:#00eeff;">↓ 下（-Y）</button><button id="sv-left" style="padding:8px;border-color:#00ccff;color:#00eeff;">← 左（-X）</button><button id="sv-right" style="padding:8px;border-color:#00ccff;color:#00eeff;">→ 右（+X）</button></div><label style="font-size:.8em;color:#CACACA;">移動距離（m）</label><input type="number" id="sv-dist" placeholder="例: 5.000" step="0.001" min="0" style="width:100%;box-sizing:border-box;margin:4px 0 12px;"><div style="display:flex;gap:8px;"><button id="sv-cancel" style="flex:1;background:#333;">キャンセル</button><button id="sv-ok" style="flex:1;background:rgba(0,150,200,.4);border-color:#00ccff;color:#00eeff;">設置</button></div></div></div><div class="survey-tip" id="survey-tip">右クリックで削除</div>
 <!-- 免責ダイアログ -->
 <div id="disclaimer-modal">
   <div class="disc-box">
