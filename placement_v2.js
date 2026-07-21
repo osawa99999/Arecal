@@ -336,7 +336,7 @@
         <h4 style="margin:0 0 8px;font-size:.82em;color:#4caf50;
                    display:flex;justify-content:space-between;align-items:center;">
           <span>🏗 配置モード</span>
-          <span style="font-size:.72em;color:CACACA;font-family:monospace;">
+          <span style="font-size:.72em;color:#CACACA;font-family:monospace;">
             Arecalay v${ARECALAY_VER}</span>
         </h4>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
@@ -366,7 +366,7 @@
 
         <div id="pm-arrow-default-ctrl" style="display:none;margin-top:8px;
           border-top:1px solid #2a2a2a;padding-top:6px;">
-          <div style="font-size:.74em;color:CACACA;margin-bottom:4px;">デフォルト太さ</div>
+          <div style="font-size:.74em;color:#CACACA;margin-bottom:4px;">デフォルト太さ</div>
           <div style="display:flex;align-items:center;gap:6px;">
             <button id="pm-arrow-step-dn" style="width:22px;height:22px;font-size:.9em;display:inline-flex;align-items:center;justify-content:center;padding:0;">◀</button>
             <span id="pm-arrow-step-lbl" style="flex:1;text-align:center;font-size:.8em;color:#4caf50;line-height:22px;">1</span>
@@ -376,7 +376,7 @@
 
         <div id="pm-line-default-ctrl" style="display:none;margin-top:8px;
           border-top:1px solid #2a2a2a;padding-top:6px;">
-          <div style="font-size:.74em;color:CACACA;margin-bottom:4px;">デフォルト太さ</div>
+          <div style="font-size:.74em;color:#CACACA;margin-bottom:4px;">デフォルト太さ</div>
           <div style="display:flex;align-items:center;gap:6px;">
             <button id="pm-line-step-dn" style="width:22px;height:22px;font-size:.9em;display:inline-flex;align-items:center;justify-content:center;padding:0;">◀</button>
             <span id="pm-line-step-lbl" style="flex:1;text-align:center;font-size:.8em;color:#4caf50;line-height:22px;">1</span>
@@ -386,7 +386,7 @@
 
         <div id="pm-text-default-ctrl" style="display:none;margin-top:8px;
           border-top:1px solid #2a2a2a;padding-top:6px;">
-          <div style="font-size:.74em;color:CACACA;margin-bottom:4px;">デフォルト文字サイズ</div>
+          <div style="font-size:.74em;color:#CACACA;margin-bottom:4px;">デフォルト文字サイズ</div>
           <div style="display:flex;align-items:center;gap:6px;">
             <button id="pm-text-step-dn" style="width:22px;height:22px;font-size:.9em;display:inline-flex;align-items:center;justify-content:center;padding:0;">◀</button>
             <span id="pm-text-step-lbl" style="flex:1;text-align:center;font-size:.8em;color:#4caf50;line-height:22px;">1</span>
@@ -396,7 +396,7 @@
 
         <div style="margin-top:8px;border-top:1px solid #2a2a2a;padding-top:6px;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-            <span style="font-size:.74em;color:CACACA;">AreCal 図形の濃度</span>
+            <span style="font-size:.74em;color:#CACACA;">AreCal 図形の濃度</span>
             <span id="pm-opacity-val" style="font-size:.74em;color:#4caf50;">50%</span>
           </div>
           <input type="range" id="pm-opacity-slider"
@@ -414,13 +414,13 @@
           color:#4caf50;border-radius:4px;cursor:pointer;">📋 他のSTEPにコピー</button>
       </div>
 
-      <div id="pm-layout-info" class="card" style="font-size:.7em;line-height:1.9;color:CACACA;">
-        <b style="color:CACACA;">操作ガイド（レイアウトモード）</b><br>
+      <div id="pm-layout-info" class="card" style="font-size:.7em;line-height:1.9;color:#CACACA;">
+        <b style="color:#CACACA;">操作ガイド（レイアウトモード）</b><br>
         クリック：図形を選択<br>
         ドラッグ：グリップを掴んで移動・変形<br>
         矢印キー：選択中を微調整移動（Shiftで大きく）<br>
         Del/Backspace：選択中の図形を削除<br>
-        <span style="color:CACACA;">AreCal 図形はこのモードでは操作不可</span>
+        <span style="color:#CACACA;">AreCal 図形はこのモードでは操作不可</span>
       </div>
 
       <button id="pm-clear-btn" style="width:100%;margin-top:4px;padding:7px;
@@ -547,9 +547,9 @@
         ${[1,2,3,4,5].map(n=>`
           <button data-step="${n-1}" style="flex:1;padding:4px 2px;font-size:.72em;
             border-radius:4px 4px 0 0;border:1px solid #333;border-bottom:none;
-            background:rgba(255,255,255,.05);color:CACACA;cursor:pointer;
+            background:rgba(255,255,255,.05);color:#CACACA;cursor:pointer;
             transition:background .15s;">
-            S${n}<br><span class="pm-tab-cnt" data-step="${n-1}" style="font-size:.8em;color:CACACA;">0</span>
+            S${n}<br><span class="pm-tab-cnt" data-step="${n-1}" style="font-size:.8em;color:#CACACA;">0</span>
           </button>`).join('')}
       </div>
       <div style="padding:4px 8px 5px;font-size:.73em;color:#CACACA;border-bottom:1px solid #2a2a2a;
@@ -864,22 +864,22 @@
           <div style="font-size:.95em;color:#81c784;font-weight:bold;white-space:nowrap;">🏗 図形を選択</div>
           <div id="pm-mp-size" style="display:flex;gap:3px;">
             <button class="pm-mp-size-btn" data-size="1"   style="padding:4px 8px;font-size:.7em;
-              border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:CACACA;">1x</button>
+              border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:#CACACA;">1x</button>
             <button class="pm-mp-size-btn" data-size="1.5" style="padding:4px 8px;font-size:.7em;
-              border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:CACACA;">1.5x</button>
+              border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:#CACACA;">1.5x</button>
             <button class="pm-mp-size-btn" data-size="2"   style="padding:4px 8px;font-size:.7em;
-              border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:CACACA;">2x</button>
+              border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:#CACACA;">2x</button>
           </div>
-          <button id="pm-mp-close" style="background:#333;border:1px solid #666;color:CACACA;
+          <button id="pm-mp-close" style="background:#333;border:1px solid #666;color:#CACACA;
             border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.8em;">✕ 閉じる</button>
         </div>
         <div id="pm-mp-divfilter" style="display:none;gap:4px;margin-bottom:8px;">
           <button class="pm-mp-div-btn" data-div="all" style="flex:1;padding:5px 2px;font-size:.76em;
-            border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:CACACA;">全て</button>
+            border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:#CACACA;">全て</button>
           <button class="pm-mp-div-btn" data-div="plan" style="flex:1;padding:5px 2px;font-size:.76em;
-            border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:CACACA;">📐 平面</button>
+            border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:#CACACA;">📐 平面</button>
           <button class="pm-mp-div-btn" data-div="elevation" style="flex:1;padding:5px 2px;font-size:.76em;
-            border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:CACACA;">📏 立面</button>
+            border-radius:4px;cursor:pointer;border:1px solid #3a4a3a;background:#1a1a1a;color:#CACACA;">📏 立面</button>
         </div>
         <div id="pm-mp-catfilter" style="display:none;margin-bottom:10px;">
           <select id="pm-mp-cat" style="width:100%;padding:5px;font-size:.78em;
@@ -910,7 +910,7 @@
     function _activateDivBtn(btn) {
       dlg.querySelectorAll('.pm-mp-div-btn').forEach(b => {
         b.classList.remove('active');
-        b.style.background = '#1a1a1a'; b.style.borderColor = '#3a4a3a'; b.style.color = 'CACACA';
+        b.style.background = '#1a1a1a'; b.style.borderColor = '#3a4a3a'; b.style.color = '#CACACA';
       });
       btn.classList.add('active');
       btn.style.background = '#1b5e20'; btn.style.borderColor = '#4caf50'; btn.style.color = '#fff';
@@ -927,7 +927,7 @@
     // サムネイルサイズ切替(1x/1.5x/2x)、前回サイズを復元
     function _activateSizeBtn(btn) {
       dlg.querySelectorAll('.pm-mp-size-btn').forEach(b => {
-        b.style.background = '#1a1a1a'; b.style.borderColor = '#3a4a3a'; b.style.color = 'CACACA';
+        b.style.background = '#1a1a1a'; b.style.borderColor = '#3a4a3a'; b.style.color = '#CACACA';
       });
       btn.style.background = '#1b5e20'; btn.style.borderColor = '#4caf50'; btn.style.color = '#fff';
     }
@@ -1028,7 +1028,7 @@
             color:${cur===state?'#a5d6a7':'#999'};">${label}</button>`;
       return `
         <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid #333;">
-          <span style="flex:1;font-size:.82em;color:${cnt?'#ddd':'#555'};">${def.label} <span style="color:CACACA;font-size:.85em;">(${cnt})</span></span>
+          <span style="flex:1;font-size:.82em;color:${cnt?'#ddd':'#555'};">${def.label} <span style="color:#CACACA;font-size:.85em;">(${cnt})</span></span>
           <div style="display:flex;width:150px;border:1px solid #444;border-radius:4px;overflow:hidden;${cnt?'':'opacity:.35;pointer-events:none;'}">
             ${seg(0,'表示')}${seg(1,'半透明')}${seg(2,'非表示')}
           </div>
@@ -1072,9 +1072,9 @@
       if (divFilter) divFilter.style.display = 'none';
       if (catFilter) catFilter.style.display = 'none';
       body.innerHTML = `
-        <div style="text-align:center;color:CACACA;padding:30px 10px;font-size:.82em;line-height:1.8;">
+        <div style="text-align:center;color:#CACACA;padding:30px 10px;font-size:.82em;line-height:1.8;">
           図形データが未読込です<br>
-          <span style="color:CACACA;font-size:.9em;">CalayMachineryData.dat</span><br><br>
+          <span style="color:#CACACA;font-size:.9em;">CalayMachineryData.dat</span><br><br>
           <button id="pm-mp-load" style="padding:8px 20px;font-size:.82em;border-radius:5px;
             background:rgba(76,175,80,.2);border:1px solid #4caf50;color:#a5d6a7;cursor:pointer;">
             📂 CalayMachineryData.dat を読込</button>
@@ -1091,7 +1091,7 @@
                      && (div === 'all' || a.division === div));
 
     if (!entries.length) {
-      body.innerHTML = `<div style="text-align:center;color:CACACA;padding:30px 10px;font-size:.82em;">該当する図形がありません</div>`;
+      body.innerHTML = `<div style="text-align:center;color:#CACACA;padding:30px 10px;font-size:.82em;">該当する図形がありません</div>`;
       return;
     }
 
@@ -1126,7 +1126,7 @@
         <canvas width="${tw}" height="${th}" style="background:#fff;border-radius:4px;max-width:100%;"></canvas>
         <span style="font-size:.68em;color:#ccc;text-align:center;overflow:hidden;
           text-overflow:ellipsis;white-space:nowrap;width:100%;">${a.name}</span>
-        <span style="font-size:.62em;color:CACACA;">${_MCAT_LABEL[a.category] || a.category}</span>`;
+        <span style="font-size:.62em;color:#CACACA;">${_MCAT_LABEL[a.category] || a.category}</span>`;
       grid.appendChild(card);
       _renderAssetThumb(a, card.querySelector('canvas'));
 
@@ -1280,7 +1280,7 @@
       <input id="_pmCircleRadiusInput" type="number" min="0.01" step="0.01" value="1"
         style="width:100%;padding:8px;font-size:1em;background:#111;border:1px solid #444;color:#fff;border-radius:4px;text-align:center;box-sizing:border-box;">
       <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;">
-        <button id="_pmCircleRadiusCancel" style="padding:7px 20px;background:#333;border:1px solid #666;color:CACACA;border-radius:6px;cursor:pointer;">キャンセル</button>
+        <button id="_pmCircleRadiusCancel" style="padding:7px 20px;background:#333;border:1px solid #666;color:#CACACA;border-radius:6px;cursor:pointer;">キャンセル</button>
         <button id="_pmCircleRadiusOk" style="padding:7px 20px;background:#2e7d32;border:1px solid #4caf50;color:#fff;border-radius:6px;cursor:pointer;">OK</button>
       </div>
     </div>`;
@@ -1637,7 +1637,7 @@
         </div>
         <div style="flex:1;"></div>
         <div style="display:flex;align-items:center;gap:5px;">
-          <span style="font-size:.68em;color:CACACA;">サイズ</span>
+          <span style="font-size:.68em;color:#CACACA;">サイズ</span>
           <button id="pm-text-size-dn" style="width:18px;height:18px;font-size:.75em;padding:0;
             display:inline-flex;align-items:center;justify-content:center;">◀</button>
           <span id="pm-text-size-lbl" style="font-size:.72em;color:${borderColor};width:12px;
@@ -2563,7 +2563,7 @@
     d.innerHTML = `<div style="background:#182a1c;border:1px solid #4caf50;border-radius:10px;padding:28px 32px;min-width:320px;text-align:center;">`
       + `<p style="color:#d8ecd8;font-size:.97em;white-space:pre-wrap;margin:0 0 20px">${msg}</p>`
       + `<div style="display:flex;gap:12px;justify-content:center;">`
-      + `<button id="_pc_no" style="padding:8px 28px;background:#333;border:1px solid #666;color:CACACA;border-radius:6px;cursor:pointer">キャンセル</button>`
+      + `<button id="_pc_no" style="padding:8px 28px;background:#333;border:1px solid #666;color:#CACACA;border-radius:6px;cursor:pointer">キャンセル</button>`
       + `<button id="_pc_yes" style="padding:8px 28px;background:#1b5e20;border:1px solid #4caf50;color:#fff;border-radius:6px;cursor:pointer">OK</button>`
       + `</div></div>`;
     d.style.display = 'flex';
@@ -2598,11 +2598,11 @@
         padding:28px 32px;min-width:320px;box-shadow:0 4px 24px rgba(0,0,0,.7);text-align:center;">
         <div style="font-size:.88em;color:#81c784;font-weight:bold;margin-bottom:12px;">
           🖨️ 何ページを印刷しますか？</div>
-        <div style="font-size:.72em;color:CACACA;margin-bottom:8px;">※ 面積ページは含みません</div>
+        <div style="font-size:.72em;color:#CACACA;margin-bottom:8px;">※ 面積ページは含みません</div>
         <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:20px;">${stepRows}</div>
         <div style="display:flex;gap:12px;justify-content:center;">
           <button id="pm-pdf-cancel" style="padding:8px 28px;font-size:.85em;border-radius:6px;
-            background:#333;border:1px solid #666;color:CACACA;cursor:pointer;">キャンセル</button>
+            background:#333;border:1px solid #666;color:#CACACA;cursor:pointer;">キャンセル</button>
           <button id="pm-pdf-ok" style="padding:8px 28px;font-size:.85em;border-radius:6px;
             background:#1b5e20;border:1px solid #4caf50;
             color:#fff;cursor:pointer;font-weight:bold;">📐 印刷範囲を選択</button>
@@ -2948,7 +2948,7 @@
     if (selCnt)   selCnt.textContent = selectedUuids.size;
     updateTabUI();
     if (steps[currentStep].length===0) {
-      list.innerHTML=`<li style="color:CACACA;text-align:center;padding:10px 0;">配置なし</li>`; return;
+      list.innerHTML=`<li style="color:#CACACA;text-align:center;padding:10px 0;">配置なし</li>`; return;
     }
     // リスト表示を反転し、「上＝前面」に統一
     // （steps配列自体は従来通り末尾＝前面のまま。描画ループ側は変更不要）
@@ -2985,7 +2985,7 @@
               title="この図形はハッチングが無いため色を変更できません"
               style="width:11px;height:11px;border-radius:50%;flex-shrink:0;
                      display:flex;align-items:center;justify-content:center;
-                     background:#2a2a2a;border:1px solid #555;color:CACACA;
+                     background:#2a2a2a;border:1px solid #555;color:#CACACA;
                      font-size:.65em;line-height:1;cursor:default;
                      opacity:${vis==='hidden'?'0.3':'1'}">×</span>`;
         return `
@@ -3036,12 +3036,12 @@
           <span style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
             <button class="pm-step-dn" data-uuid="${ann.uuid}"
               style="width:16px;height:16px;font-size:.65em;padding:0;border-radius:2px;
-                background:rgba(255,255,255,.06);border:1px solid #444;color:CACACA;cursor:pointer;">◀</button>
+                background:rgba(255,255,255,.06);border:1px solid #444;color:#CACACA;cursor:pointer;">◀</button>
             <span class="pm-step-val"
               style="width:12px;text-align:center;font-size:.7em;color:#4caf50;">${step}</span>
             <button class="pm-step-up" data-uuid="${ann.uuid}"
               style="width:16px;height:16px;font-size:.65em;padding:0;border-radius:2px;
-                background:rgba(255,255,255,.06);border:1px solid #444;color:CACACA;cursor:pointer;">▶</button>
+                background:rgba(255,255,255,.06);border:1px solid #444;color:#CACACA;cursor:pointer;">▶</button>
           </span>
           <button class="pm-del-btn" data-uuid="${ann.uuid}"
             style="background:rgba(200,80,80,.15);border:1px solid #c04040;border-radius:3px;
@@ -3209,11 +3209,11 @@
               background:rgba(255,255,255,.07);border:1px solid #333;color:#ccc;cursor:pointer;
               text-align:left;">
               STEP ${s+1}
-              <span style="font-size:.8em;color:CACACA;">(現在 ${steps[s].length}件)</span>
+              <span style="font-size:.8em;color:#CACACA;">(現在 ${steps[s].length}件)</span>
             </button>`).join('')}
         </div>
         <button id="pm-copy-cancel" style="width:100%;margin-top:16px;padding:8px;font-size:.85em;
-          background:#333;border:1px solid #666;color:CACACA;border-radius:6px;cursor:pointer;">
+          background:#333;border:1px solid #666;color:#CACACA;border-radius:6px;cursor:pointer;">
           キャンセル</button>
       </div>
     `;
