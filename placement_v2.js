@@ -21,6 +21,11 @@
  * placement.js — AreCal 配置モード拡張 v0.9.32
  *
  * [最新の変更]
+ * v0.0043:
+ *   - 1) Arecalayで入出力メニューを開いたままArecal→Arecalayと切り替えても展開状態(ボタン
+ *     ロック含む)が残ってしまうバグを修正。exitPlacementMode()でclosePmIoMenu()を呼ぶように
+ *     した。
+ *   - 2) 入出力メニュー展開中、ESCキー・右クリックの両方でキャンセルできるようにした。
  * v0.0042:
  *   - logo-areaがArecalayモードで一緒に非表示になっていたのを修正(以前のセッションで混入した
  *     バグ)。元々の構成通り、ロゴは常時表示・その下にステップタブが並ぶようにした。それに伴い
@@ -144,7 +149,7 @@
 (function () {
   'use strict';
 
-  const ARECALAY_VER = '0.0042';
+  const ARECALAY_VER = '0.0043';
   window._pmVersion = ARECALAY_VER;
   const COLORS      = ['#ff4081','#e8a020','#188C1C','#1B3EAB','#aaaaaa','#ff8c00','#111111'];
   const PM_UNDO_MAX = 30;
@@ -671,6 +676,14 @@
         e.stopPropagation(); e.preventDefault(); pmRedo(); return;
       }
       if (e.key==='Escape') {
+        // v0.0414: 2) 入出力メニュー展開中はまずそちらを閉じる(距離測定より優先。距離測定は
+        // 入出力メニュー展開中は_lockPmToolButtonsでボタン自体が無効化されているため到達しない想定だが、念のため先に処理)
+        if (pmIoMenuOpen) {
+          e.stopPropagation();
+          closePmIoMenu();
+          _toast('↩ 入出力をキャンセル', 800);
+          return;
+        }
         // v0.0409: 15) 距離測定モード中はまずそちらをキャンセル(AreCal側の関数を呼ぶ)
         if (typeof window._isDistModeOn === 'function' && window._isDistModeOn()) {
           e.stopPropagation();
@@ -770,6 +783,13 @@
 
     document.addEventListener('contextmenu', function(e) {
       if (!placementMode) return;
+      // v0.0414: 2) 入出力メニュー展開中は右クリックでキャンセルできるようにする(キャンバス外でも可)
+      if (pmIoMenuOpen) {
+        e.preventDefault();
+        closePmIoMenu();
+        _toast('↩ 入出力をキャンセル', 800);
+        return;
+      }
       if (e.target===pmCv || e.target===document.getElementById('draw-cv')) {
         e.preventDefault();
       }
@@ -839,6 +859,8 @@
     // 抜けていた。これが原因でArecalay→Arecal復帰後、左UIの表示が更新されなくなっていた。
     document.querySelectorAll('[data-pm-hidden-left]').forEach(el => { el.style.display=''; delete el.dataset.pmHiddenLeft; });
     cancelAnnotMode();
+    closePmIoMenu(); // v0.0414: Arecalay→Arecal復帰後も入出力メニュー(ロック状態含む)が
+                     // 残ってしまい、再度Arecalayに戻ると入出力ボタンが押しっぱなしになるバグの修正
     // v0.0413: Arecalay→AreCal復帰時、Arecalayで起動していたAreCal本体側の距離測定が
     // キャンセルされずに残ってしまうバグを修正。AreCal/Arecalayは排他使用の方針のため、
     // モード切替時は必ず全ての進行中操作をキャンセルする
