@@ -3,7 +3,7 @@
  *  Arecalay (placement.js) — 免責事項および利用上の注意
  * ================================================================
  *  本ソフトウェア（Arecalay、AreCalの配置モード拡張）は、大崎建設株式会社
- *  Tech Lab（OSAKI Tech Lab）が独自に開発したものであり、同社内での使用を
+ *  ICT推進室（旧称・愛称：OSAKI Tech Lab）が独自に開発したものであり、同社内での使用を
  *  目的としています。
  *
  *  ・本ソフトウェアは現状のまま提供されるものとし、その動作、精度、完全性
@@ -21,6 +21,16 @@
  * placement.js — AreCal 配置モード拡張 v0.9.32
  *
  * [最新の変更]
+ * v0.0045:
+ *   - 距離測定ボタンのアイコンを📏(線ツールと同じ)から📐(三角定規)に変更し、線ツールと
+ *     視覚的に区別できるようにした。
+ * v0.0044:
+ *   - 保存サブメニューのボタン名を「書出」→「保存（Arela）」に変更。
+ *   - 会社名表記を「大崎建設株式会社 ICT推進室」に修正(Tech Labは愛称のため)。
+ *   - 冒頭の免責事項コメントの会社名も同様に修正。
+ *   - セキュリティ監査で発見: 左パネルのオブジェクト名表示・機器選択カードのアセット名表示が
+ *     ユーザー入力/datファイルの値をエスケープせずinnerHTMLへ挿入しておりXSSリスクがあった。
+ *     _escHtml()を追加して両箇所に適用。
  * v0.0043:
  *   - 1) Arecalayで入出力メニューを開いたままArecal→Arecalayと切り替えても展開状態(ボタン
  *     ロック含む)が残ってしまうバグを修正。exitPlacementMode()でclosePmIoMenu()を呼ぶように
@@ -149,7 +159,7 @@
 (function () {
   'use strict';
 
-  const ARECALAY_VER = '0.0043';
+  const ARECALAY_VER = '0.0045';
   window._pmVersion = ARECALAY_VER;
   const COLORS      = ['#ff4081','#e8a020','#188C1C','#1B3EAB','#aaaaaa','#ff8c00','#111111'];
   const PM_UNDO_MAX = 30;
@@ -392,7 +402,7 @@
           <button id="pm-text-btn">💬 テキスト</button>
           <button id="pm-line-btn">📏 線</button>
           <button id="pm-circle-btn"><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid #cacaca;margin-right:3px;vertical-align:-1px;"></span>円</button>
-          <button id="pm-dist-btn">📏 距離測定</button>
+          <button id="pm-dist-btn">📐 距離測定</button>
           <button id="pm-machinery-btn">🏗 図形</button>
           <button id="pm-io-btn" style="grid-column:1/-1;">📁 入出力</button>
         </div>
@@ -1219,8 +1229,8 @@
       card.innerHTML = `
         <canvas width="${tw}" height="${th}" style="background:#fff;border-radius:4px;max-width:100%;"></canvas>
         <span style="font-size:.68em;color:#ccc;text-align:center;overflow:hidden;
-          text-overflow:ellipsis;white-space:nowrap;width:100%;">${a.name}</span>
-        <span style="font-size:.62em;color:#CACACA;">${_MCAT_LABEL[a.category] || a.category}</span>`;
+          text-overflow:ellipsis;white-space:nowrap;width:100%;">${_escHtml(a.name)}</span>
+        <span style="font-size:.62em;color:#CACACA;">${_escHtml(_MCAT_LABEL[a.category] || a.category)}</span>`;
       grid.appendChild(card);
       _renderAssetThumb(a, card.querySelector('canvas'));
 
@@ -3162,7 +3172,7 @@
           <span class="pm-ann-label" data-uuid="${ann.uuid}"
             style="flex:1;overflow:hidden;text-overflow:ellipsis;
                    white-space:nowrap;color:${vis==='hidden'?'#444':'#bbb'};
-                   font-size:.82em;">${ann.name||ann.text||'?'}</span>
+                   font-size:.82em;">${_escHtml(ann.name||ann.text||'?')}</span>
           <span style="display:flex;align-items:center;gap:2px;flex-shrink:0;">
             <button class="pm-step-dn" data-uuid="${ann.uuid}"
               style="width:16px;height:16px;font-size:.65em;padding:0;border-radius:2px;
@@ -3586,6 +3596,15 @@
   function uid() {
     return crypto.randomUUID?crypto.randomUUID()
       :Math.random().toString(36).slice(2)+Date.now().toString(36);
+  }
+
+  // v0.0414: セキュリティ監査で発見 — ユーザーが入力した文字列(テキスト注釈の内容等)を
+  // innerHTMLへそのまま差し込むとHTMLタグとして解釈されてしまう(自己XSS/共有.arelaファイル経由の
+  // XSSリスク)。表示前に必ずこの関数でエスケープする。
+  function _escHtml(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
   }
 
   if (document.readyState==='loading') {
