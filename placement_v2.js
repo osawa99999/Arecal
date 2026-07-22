@@ -405,7 +405,7 @@
           <div id="pm-io-write-sub" style="display:none;padding:4px;">
             <button class="io-sub-btn" id="pm-save-btn"
               style="background:rgba(30,80,180,.22);border-color:#3060b060;color:#80b0f0;">
-              💾 書出</button>
+              💾 保存（Arela）</button>
             <button class="io-sub-btn" id="pm-pdf-btn"
               style="background:rgba(60,140,60,.18);border-color:#3a7a3a;color:#80e080;">
               🖨 PDF出力</button>
