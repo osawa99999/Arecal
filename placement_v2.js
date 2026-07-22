@@ -1,7 +1,36 @@
 /**
+ * ================================================================
+ *  Arecalay (placement.js) — 免責事項および利用上の注意
+ * ================================================================
+ *  本ソフトウェア（Arecalay、AreCalの配置モード拡張）は、大﨑建設株式会社
+ *  Tech Lab（OSAKI Tech Lab）が独自に開発したものであり、同社内での使用を
+ *  目的としています。
+ *
+ *  ・本ソフトウェアは現状のまま提供されるものとし、その動作、精度、完全性
+ *    についていかなる保証も行いません。
+ *  ・本ソフトウェアの使用または使用不能により生じた、直接的・間接的損害
+ *    （データの損失、業務の中断、計算結果の誤りに起因する損害等を含みます
+ *    がこれらに限りません）について、開発者および開発元は一切の責任を負い
+ *    ません。使用は利用者ご自身の責任において行ってください。
+ *  ・本ソフトウェアの著作権は開発元に帰属します。開発元の事前の許可なく、
+ *    本ソフトウェア（本ファイルおよび関連する一式のファイルを含みます）を
+ *    複製、転載、再配布すること、ならびに改変・翻案の上で二次的著作物を
+ *    作成し利用・頒布することを固く禁じます。
+ * ================================================================
+ *
  * placement.js — AreCal 配置モード拡張 v0.9.32
  *
  * [最新の変更]
+ * v0.0042:
+ *   - logo-areaがArecalayモードで一緒に非表示になっていたのを修正(以前のセッションで混入した
+ *     バグ)。元々の構成通り、ロゴは常時表示・その下にステップタブが並ぶようにした。それに伴い
+ *     pm-left-panelの高さ指定をheight:100%からflex:1に変更(logo-area分の高さを正しく差し引いて
+ *     レイアウトされるように)。
+ *   - 距離測定のゴムライン(pmCv側)がスナップ点ではなく生のマウス座標に向かって描画されており、
+ *     AreCal本体側のスナップ済みゴムラインと2本に見えてしまう問題を修正。AreCal本体側の
+ *     window._getDistPoints()にスナップ座標(lastSnap優先、無ければlastMouseX/Y)を追加し、
+ *     Arecalay側もそれと同じ終点を使うようにした。
+ *   - 冒頭に免責事項・利用規約コメントを追加(自己責任・無断複製改変転載禁止)。
  * v0.0041:
  *   - 2) 距離測定モード中に矢印/線/円/図形ボタンを押すと両方同時に有効になり、クリックのたびに
  *     2つの機能が競合するバグを修正。setAnnotMode()で別ツールへ切り替える際、距離測定がONなら
@@ -115,7 +144,7 @@
 (function () {
   'use strict';
 
-  const ARECALAY_VER = '0.0041';
+  const ARECALAY_VER = '0.0042';
   window._pmVersion = ARECALAY_VER;
   const COLORS      = ['#ff4081','#e8a020','#188C1C','#1B3EAB','#aaaaaa','#ff8c00','#111111'];
   const PM_UNDO_MAX = 30;
@@ -358,8 +387,8 @@
           <button id="pm-text-btn">💬 テキスト</button>
           <button id="pm-line-btn">📏 線</button>
           <button id="pm-circle-btn"><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:transparent;border:2px solid #cacaca;margin-right:3px;vertical-align:-1px;"></span>円</button>
-          <button id="pm-machinery-btn">🏗 図形</button>
           <button id="pm-dist-btn">📏 距離測定</button>
+          <button id="pm-machinery-btn">🏗 図形</button>
           <button id="pm-io-btn" style="grid-column:1/-1;">📁 入出力</button>
         </div>
         <!-- v0.0408: AreCal本体の入出力メニューと同じ見た目・挙動に統一 -->
@@ -557,7 +586,7 @@
     if (!listArea) return;
     pmLeftPanel = document.createElement('div');
     pmLeftPanel.id = 'pm-left-panel';
-    pmLeftPanel.style.cssText = 'display:none;flex-direction:column;height:100%;overflow:hidden;';
+    pmLeftPanel.style.cssText = 'display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;';
     pmLeftPanel.innerHTML = `
       <div id="pm-step-tabs" style="display:flex;gap:2px;padding:6px 6px 0;flex-shrink:0;">
         ${[1,2,3,4,5].map(n=>`
@@ -775,7 +804,9 @@
 
     const listArea = document.getElementById('list-area');
     if (listArea) {
-      listArea.parentElement.querySelectorAll(':scope > *:not(#pm-left-panel)').forEach(el => {
+      // v0.0413: logo-areaも一緒に非表示にしてしまっていたのを修正(以前のセッションで混入したバグ)。
+      // 元々はロゴが常時表示、その下にステップタブが並ぶ構成だったため、logo-areaは除外する
+      listArea.parentElement.querySelectorAll(':scope > *:not(#pm-left-panel):not(#logo-area)').forEach(el => {
         el.dataset.pmHiddenLeft='1'; el.style.display='none';
       });
       if (pmLeftPanel) pmLeftPanel.style.display='flex';
@@ -808,6 +839,13 @@
     // 抜けていた。これが原因でArecalay→Arecal復帰後、左UIの表示が更新されなくなっていた。
     document.querySelectorAll('[data-pm-hidden-left]').forEach(el => { el.style.display=''; delete el.dataset.pmHiddenLeft; });
     cancelAnnotMode();
+    // v0.0413: Arecalay→AreCal復帰時、Arecalayで起動していたAreCal本体側の距離測定が
+    // キャンセルされずに残ってしまうバグを修正。AreCal/Arecalayは排他使用の方針のため、
+    // モード切替時は必ず全ての進行中操作をキャンセルする
+    if (typeof window._isDistModeOn === 'function' && window._isDistModeOn()
+        && typeof window.setDistMode === 'function') {
+      window.setDistMode(false);
+    }
     previewPos=null; selectedUuids.clear(); dragState=null; hoverUuid=null;
     _toast('📐 面積計算モードに戻りました', 2000);
 
@@ -1904,7 +1942,7 @@
     // ここで描き直すことでArecalayの図形と重なっても距離測定線が常に見えるようにする
     if (typeof window._isDistModeOn === 'function' && window._isDistModeOn()
         && typeof window._getDistPoints === 'function') {
-      const {pts: dPts, history: dHist} = window._getDistPoints() || {};
+      const {pts: dPts, history: dHist, cursor: dCursor} = window._getDistPoints() || {};
       if ((dHist && dHist.length) || (dPts && dPts.length)) {
         const {zoom: dz} = getState();
         pmCtx.save();
@@ -1922,12 +1960,12 @@
         });
         const lastPt = (dHist && dHist.length) ? dHist[dHist.length-1]
                      : (dPts && dPts.length ? dPts[dPts.length-1] : null);
-        if (lastPt && _pmLastMouseCX != null) {
-          const mPos = getLogical({ clientX:_pmLastMouseCX, clientY:_pmLastMouseCY });
-          const {cx: mcx, cy: mcy} = l2c(mPos.lx, mPos.ly);
+        if (lastPt && dCursor) {
+          // v0.0413: 3) スナップ点が有効な間は必ずその座標を終点にする(AreCal本体側と完全に一致させ、
+          // 「スナップ点への線」と「マウスカーソルへの線」の2本が見えてしまう問題を解消)
           pmCtx.beginPath();
           pmCtx.moveTo(lastPt.x, lastPt.y);
-          pmCtx.lineTo(mcx, mcy);
+          pmCtx.lineTo(dCursor.x, dCursor.y);
           pmCtx.strokeStyle = '#ff6600'; pmCtx.lineWidth = 3.5 / Math.max(dz, 0.005);
           pmCtx.setLineDash([8/Math.max(dz,0.005), 5/Math.max(dz,0.005)]);
           pmCtx.stroke(); pmCtx.setLineDash([]);
